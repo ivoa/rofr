@@ -66,6 +66,30 @@ benson --reload
 | `BENSON_PARITY_JSON` | off | Enable JSON parity mode (`=1` to enable) |
 | `BENSON_EXPOSE_ERRORS` | off | Expose error details in responses (debug only; `=1` to enable) |
 
+## Deployers
+
+Deployers who operate a live Registry of Registries instance should run the publisher liveness check periodically:
+
+```bash
+benson check-publishers
+```
+
+The command reads `PUBLISHERS_REGISTRY_FILE`, sends one lightweight OAI-PMH `Identify` request to each registered publisher endpoint, and writes status metadata back into the publishers JSON file. It does not harvest records; its intent is to catch entries whose services have gone stale, become unreachable, changed identity, or stopped operating.
+
+Typical usage is from cron or another deployment scheduler, using the same environment and volume mount as the running Benson service:
+
+```bash
+PUBLISHERS_REGISTRY_FILE=/data/publishers/publishers.json benson check-publishers
+```
+
+Useful options:
+
+- `--dry-run` reports results without updating `publishers.json`.
+- `--json` prints machine-readable results for logs or monitoring.
+- `--timeout SEC` overrides `PUBLISHERS_CHECK_TIMEOUT_SEC`.
+
+Any non-`ok` publisher causes a non-zero exit code unless `--dry-run` is used, which makes the command suitable for alerting. The main page displays the last check status and timestamp once the command has populated `last_checked_at` and `check_status`.
+
 ### Built-in XSD catalog (`builtinSchemas`)
 
 When the validator form enables **Use built-in XSD schemas**, phase 2 (IVOA four GETs) and phase 3 (harvested records) use the bundled namespace map in [`src/benson/xml/catalog.py`](src/benson/xml/catalog.py) under `SCHEMA_ROOT` (default [`assets/schemas/`](assets/schemas/)).
@@ -93,11 +117,11 @@ docker build -t benson:local .
 docker run --rm -p 8000:8000 benson:local
 ```
 
-Pull from GitLab Container Registry (after CI has pushed an image):
+Pull from GitHub Container Registry (after CI has pushed an image):
 
 ```bash
-docker login registry.gitlab.com
-docker pull registry.gitlab.com/djenkins.cadc/benson:latest
+docker login ghcr.io
+docker pull ghcr.io/my-org/benson:latest
 ```
 
 ### Docker Compose
