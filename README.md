@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/images/logo.png" alt="Benson logo" width="240">
+</p>
+
 # Benson
 
 IVOA registry validator: OAI-PMH harvest checks, IVOA four-GET profile, VOResource XSD/XSLT validation.
