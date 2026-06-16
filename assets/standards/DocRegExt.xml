@@ -1,0 +1,70 @@
+<ri:Resource
+  xsi:type="vstd:Standard"
+  created="2026-05-28T06:10:00"
+  updated="2026-05-28T06:10:00"
+  status="active"
+  xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0"
+  xmlns:vstd="http://www.ivoa.net/xml/StandardsRegExt/v1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0"
+  xsi:schemaLocation="http://www.ivoa.net/xml/VOResource/v1.0
+    https://www.ivoa.net/xml/VOResource/v1.0
+  http://www.ivoa.net/xml/StandardsRegExt/v1.0
+    https://www.ivoa.net/xml/StandardsRegExt/v1.0
+  http://www.ivoa.net/xml/VOResource/v1.0
+    https://www.ivoa.net/xml/VOResource/v1.0">
+
+  <title>Educational Resources in the Virtual Observatory</title>
+  <shortName>DocRegExt</shortName>
+  <identifier>ivo://ivoa.net/std/DocRegExt</identifier>
+  <!-- <altIdentifier>doi:Look up on ADS once your standard has made
+    it there and then update this. </altIdentifier> -->
+  <curation>
+    <publisher>IVOA</publisher>
+
+    <creator>
+      <name>Demleitner, M.</name>
+    </creator>
+    <creator>
+      <name>Molinaro, M.</name>
+    </creator>
+    <creator>
+      <name>Iafrate, G.</name>
+    </creator>
+    <creator>
+      <name>Heinl, H.</name>
+    </creator>
+
+    <date role="update">2026-05-27</date>
+    <version>1.0</version>
+    <contact>
+      <name>IVOA Education IG</name>
+      <email>edu@ivoa.net</email>
+    </contact>
+  </curation>
+  <content>
+    <subject>virtual-observatories</subject>
+    <subject>astronomy-education</subject>
+    <subject>astronomy-software</subject>
+
+    <description>
+			Following the spirit of the Virtual Observatory (VO), the production and
+			provision of material to teach VO usage, both for introducing VO
+			workflows and as an element of a larger astronomy curriculum, should be a
+			joint, global, and distributed effort. In order to ensure global
+			discoverability of the results of that effort, this standard defines an
+			extension to the VOResource metadata scheme suitable for educational
+			texts, and it describes how RegTAP can be used to then discover
+			educational material registered using that extension.
+    </description>
+    <referenceURL>https://ivoa.net/documents/DocRegExt/</referenceURL>
+    <type>Other</type>
+    <contentLevel>Research</contentLevel>
+  </content>
+
+  <endorsedVersion status="rec">1.0</endorsedVersion>
+
+  <schema namespace="http://www.ivoa.net/xml/DocRegExt/v1">
+  	<location>http://www.ivoa.net/xml/DocRegExt/v1</location>
+  </schema>
+</ri:Resource>
