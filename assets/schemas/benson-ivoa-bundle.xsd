@@ -15,4 +15,5 @@
   <xs:import namespace="http://www.ivoa.net/xml/VOSITables/v1.0" schemaLocation="VOSITables-v1.xsd"/>
   <xs:import namespace="http://www.ivoa.net/xml/SSA/v1.1" schemaLocation="SSA-v1.xsd"/>
   <xs:import namespace="http://www.ivoa.net/xml/SIA/v1.1" schemaLocation="SIA-v1.xsd"/>
+  <xs:import namespace="http://www.ivoa.net/xml/DocRegExt/v1" schemaLocation="DocRegExt-v1.xsd"/>
 </xs:schema>

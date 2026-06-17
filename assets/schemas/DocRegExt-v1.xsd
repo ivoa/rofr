@@ -4,7 +4,7 @@
   xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0"
   xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1"
   xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1"
-  xmlns:doc="http://www.ivoa.net/xml/DocRegExt/v1.0"
+  xmlns:doc="http://www.ivoa.net/xml/DocRegExt/v1"
   version="1.0"
   targetNamespace="http://www.ivoa.net/xml/DocRegExt/v1"
   elementFormDefault="unqualified"
