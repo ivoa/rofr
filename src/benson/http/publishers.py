@@ -25,6 +25,7 @@ def _publisher_json(rec) -> dict:
         "title": rec.title,
         "harvest_access_url": rec.harvest_access_url,
         "registered_at": rec.registered_at,
+        "updated_at": rec.updated_at,
         "validation_run_id": rec.validation_run_id,
         "last_checked_at": rec.last_checked_at,
         "check_status": rec.check_status,
@@ -49,14 +50,14 @@ async def registration_eligibility(run_id: str, request: Request) -> JSONRespons
     run = await store.get(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Validation session not found")
-    return JSONResponse(eligibility_payload(run, settings))
+    return JSONResponse(await eligibility_payload(run, settings))
 
 
 @router.post("/publishers")
 async def register_publisher_api(body: RegisterBody, request: Request) -> JSONResponse:
     settings = request.app.state.settings
     try:
-        rec = await register_publisher(
+        result = await register_publisher(
             body.run_id,
             oai_identifier=body.oai_identifier,
             title=body.title,
@@ -64,4 +65,7 @@ async def register_publisher_api(body: RegisterBody, request: Request) -> JSONRe
         )
     except RegistrationError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
-    return JSONResponse(_publisher_json(rec), status_code=201)
+    payload = _publisher_json(result.record)
+    payload["created"] = result.created
+    status_code = 201 if result.created else 200
+    return JSONResponse(payload, status_code=status_code)

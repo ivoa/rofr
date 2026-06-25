@@ -135,6 +135,52 @@ async def test_stale_cache_calls_regtap(
     client.post.assert_awaited_once()
     assert len(rows) == 1
     assert rows[0].title == "Search VO"
+    assert csv_path.read_text(encoding="utf-8") == f"{_CSV_HEADER}\n{_CSV_ROW_SEARCH}\n"
+
+
+@pytest.mark.asyncio
+async def test_regtap_fetch_writes_cache_to_empty_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_searchables_env(monkeypatch)
+    cache_dir = tmp_path / "searchables"
+    monkeypatch.setenv("SEARCHABLES_CACHE_DIR", str(cache_dir))
+    monkeypatch.setenv("SEARCHABLES_REGTAP_SYNC_URL", "https://tap.test/sync")
+    settings = Settings.from_env()
+    client = AsyncMock(spec=httpx.AsyncClient)
+    resp = MagicMock()
+    resp.text = f"{_CSV_HEADER}\n{_CSV_ROW_PARAM}\n"
+    resp.raise_for_status = MagicMock()
+    client.post = AsyncMock(return_value=resp)
+
+    rows = await load_searchables(client, settings, timeout_sec=5.0)
+    assert len(rows) == 1
+    cache_file = cache_dir / "registries.csv"
+    assert cache_file.is_file()
+    assert cache_file.read_text(encoding="utf-8") == resp.text
+
+
+@pytest.mark.asyncio
+async def test_second_load_uses_written_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_searchables_env(monkeypatch)
+    cache_dir = tmp_path / "searchables"
+    monkeypatch.setenv("SEARCHABLES_CACHE_DIR", str(cache_dir))
+    monkeypatch.setenv("SEARCHABLES_CACHE_MAX_AGE_SEC", "3600")
+    monkeypatch.setenv("SEARCHABLES_REGTAP_SYNC_URL", "https://tap.test/sync")
+    settings = Settings.from_env()
+    client = AsyncMock(spec=httpx.AsyncClient)
+    resp = MagicMock()
+    resp.text = f"{_CSV_HEADER}\n{_CSV_ROW_PARAM}\n"
+    resp.raise_for_status = MagicMock()
+    client.post = AsyncMock(return_value=resp)
+
+    rows1 = await load_searchables(client, settings, timeout_sec=5.0)
+    rows2 = await load_searchables(client, settings, timeout_sec=5.0)
+    assert len(rows1) == 1
+    assert rows2 == rows1
+    client.post.assert_awaited_once()
 
 
 @pytest.mark.asyncio

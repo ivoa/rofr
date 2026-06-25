@@ -124,9 +124,37 @@ def _run_check_publishers(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def _run_sync_searchables(args: argparse.Namespace) -> None:
+    import httpx
+
+    from benson.config import Settings
+    from benson.service.searchables_regtap import refresh_searchables_cache
+
+    settings = Settings.from_env()
+    timeout = min(60.0, settings.harvest_timeout_sec)
+    if settings.searchables_cache_file is None and settings.searchables_cache_dir is None:
+        print(
+            "No searchables cache configured (SEARCHABLES_CACHE_FILE or SEARCHABLES_CACHE_DIR).",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    async def run() -> int:
+        async with httpx.AsyncClient(http2=False) as client:
+            rows = await refresh_searchables_cache(client, settings, timeout_sec=timeout)
+            return len(rows)
+
+    count = asyncio.run(run())
+    if args.json:
+        print(json.dumps({"status": "ok", "count": count}))
+    else:
+        print(f"Searchables cache refreshed ({count} registries).")
+
+
 def main() -> None:
     if len(sys.argv) == 1 or (
-        len(sys.argv) > 1 and sys.argv[1] not in ("serve", "check-publishers")
+        len(sys.argv) > 1
+        and sys.argv[1] not in ("serve", "check-publishers", "sync-searchables")
     ):
         sys.argv.insert(1, "serve")
 
@@ -158,11 +186,23 @@ def main() -> None:
         help="Per-request timeout (default: PUBLISHERS_CHECK_TIMEOUT_SEC or 30)",
     )
 
+    sync_parser = subparsers.add_parser(
+        "sync-searchables",
+        help="Fetch full searchable registries from RegTAP and write the CSV cache",
+    )
+    sync_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print result as JSON",
+    )
+
     args = parser.parse_args()
     if args.command in (None, "serve"):
         _run_serve(args)
     elif args.command == "check-publishers":
         _run_check_publishers(args)
+    elif args.command == "sync-searchables":
+        _run_sync_searchables(args)
     else:
         parser.error(f"unknown command: {args.command}")
 

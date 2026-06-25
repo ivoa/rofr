@@ -43,6 +43,7 @@ class StoredPublisher:
     title: str
     harvest_access_url: str
     registered_at: str
+    updated_at: str | None = None
     validation_run_id: str | None = None
     last_checked_at: str | None = None
     check_status: str | None = None
@@ -56,6 +57,7 @@ class StoredPublisher:
             title=self.title,
             harvest_access_url=self.harvest_access_url,
             registered_at=self.registered_at,
+            updated_at=self.updated_at,
             validation_run_id=self.validation_run_id,
             last_checked_at=self.last_checked_at,
             check_status=self.check_status,
@@ -73,6 +75,7 @@ class StoredPublisher:
             title=rec.title,
             harvest_access_url=rec.harvest_access_url,
             registered_at=rec.registered_at or datetime.now(UTC).isoformat(),
+            updated_at=rec.updated_at,
             validation_run_id=rec.validation_run_id,
             last_checked_at=rec.last_checked_at,
             check_status=rec.check_status,
@@ -131,6 +134,7 @@ class PublisherStore:
                     title=title or oid,
                     harvest_access_url=url,
                     registered_at=row.get("registered_at"),
+                    updated_at=row.get("updated_at"),
                     validation_run_id=row.get("validation_run_id"),
                     last_checked_at=row.get("last_checked_at"),
                     check_status=row.get("check_status"),
@@ -141,9 +145,17 @@ class PublisherStore:
             )
         return out
 
-    async def find_by_endpoint(self, url: str) -> PublisherRegistry | None:
+    async def find_by_endpoint(
+        self,
+        url: str,
+        *,
+        exclude_identifier: str | None = None,
+    ) -> PublisherRegistry | None:
         norm = normalize_endpoint(url)
+        exclude = (exclude_identifier or "").strip()
         for rec in await self.load():
+            if exclude and rec.oai_identifier == exclude:
+                continue
             if rec.harvest_access_url and normalize_endpoint(rec.harvest_access_url) == norm:
                 return rec
         return None

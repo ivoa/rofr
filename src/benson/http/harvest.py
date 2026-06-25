@@ -135,7 +135,7 @@ async def harvest_validater(request: Request) -> Response:
                 detail="Register requires oai_identifier and title query parameters.",
             )
         try:
-            rec = await register_publisher(
+            result = await register_publisher(
                 run.run_id,
                 oai_identifier=oid,
                 title=title,
@@ -146,9 +146,11 @@ async def harvest_validater(request: Request) -> Response:
         return pseudo_json(
             {
                 "status": "ok",
-                "oai_identifier": rec.oai_identifier,
-                "title": rec.title,
-                "harvest_access_url": rec.harvest_access_url,
+                "created": result.created,
+                "oai_identifier": result.record.oai_identifier,
+                "title": result.record.title,
+                "harvest_access_url": result.record.harvest_access_url,
+                "updated_at": result.record.updated_at,
             }
         )
 

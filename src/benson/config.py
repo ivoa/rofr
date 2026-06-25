@@ -64,6 +64,9 @@ class Settings:
         adql = (os.environ.get("SEARCHABLES_ADQL") or "").strip()
         cf = os.environ.get("SEARCHABLES_CACHE_FILE", "").strip()
         cd = os.environ.get("SEARCHABLES_CACHE_DIR", "").strip()
+        searchables_cache_dir = (
+            Path(cd).resolve() if cd else (root / "data" / "searchables").resolve()
+        )
         pub_dir = Path(
             os.environ.get("PUBLISHERS_DATA_DIR", root / "data" / "publishers")
         ).resolve()
@@ -115,7 +118,7 @@ class Settings:
             searchables_regtap_sync_url=regtap,
             searchables_adql=adql,
             searchables_cache_file=Path(cf).resolve() if cf else None,
-            searchables_cache_dir=Path(cd).resolve() if cd else None,
+            searchables_cache_dir=searchables_cache_dir,
             searchables_cache_max_age_sec=max_age,
             harvest_timeout_sec=float(os.environ.get("HARVEST_TIMEOUT_SEC", "240")),
             publishers_check_timeout_sec=float(

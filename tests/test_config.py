@@ -22,6 +22,7 @@ def test_project_root_source_layout(tmp_path, monkeypatch) -> None:
 
 def test_project_root_from_workdir(tmp_path, monkeypatch) -> None:
     monkeypatch.delenv("SCHEMA_ROOT", raising=False)
+    monkeypatch.delenv("SEARCHABLES_CACHE_DIR", raising=False)
     (tmp_path / "assets" / "schemas").mkdir(parents=True)
     fake_file = tmp_path / "lib" / "python3.14" / "site-packages" / "benson" / "config.py"
     fake_file.parent.mkdir(parents=True)
@@ -31,3 +32,4 @@ def test_project_root_from_workdir(tmp_path, monkeypatch) -> None:
     assert cfg.project_root() == tmp_path.resolve()
     settings = Settings.from_env()
     assert settings.schema_root == (tmp_path / "assets" / "schemas").resolve()
+    assert settings.searchables_cache_dir == (tmp_path / "data" / "searchables").resolve()

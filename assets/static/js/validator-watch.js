@@ -9,8 +9,11 @@
   const progressSteps = document.getElementById("val-progress-steps");
   const resultHost = document.getElementById("val-result");
   const registerPanel = document.getElementById("val-register");
+  const registerHeading = document.getElementById("val-register-heading");
   const registerForm = document.getElementById("val-register-form");
   const registerMsg = document.getElementById("val-register-msg");
+  const registerCurrentUrl = document.getElementById("val-register-current-url");
+  const registerSubmit = document.getElementById("val-register-submit");
   const registerDone = document.getElementById("val-register-done");
   const submitBtn = document.getElementById("validator-submit");
   let pollTimer = null;
@@ -116,6 +119,20 @@
   }
 
   function registrationBlockedMessage(data) {
+    if (data.update_blocked_by === "identify_identifier") {
+      return (
+        "All validation checks passed, but the Identify response did not include a registry identifier. "
+        + "Updates require a live identifier that matches the registered listing."
+      );
+    }
+    if (data.update_blocked_by === "identify_identifier_mismatch") {
+      return (
+        "All validation checks passed, but the live Identify identifier does not match the registered listing."
+      );
+    }
+    if (data.update_blocked_by === "endpoint_conflict" && data.reason) {
+      return data.reason;
+    }
     if (data.registration_blocked_by === "builtin_schemas") {
       return (
         "All validation checks passed, but registration requires built-in XSD schemas. "
@@ -137,10 +154,18 @@
       registerPanel.classList.remove("val-register--blocked");
     }
     if (registerDone) registerDone.hidden = true;
+    if (registerCurrentUrl) {
+      registerCurrentUrl.hidden = true;
+      registerCurrentUrl.textContent = "";
+    }
     if (registerForm) {
       registerForm.hidden = false;
       registerForm.reset();
     }
+    const idInput = document.getElementById("reg-oai-id");
+    if (idInput) idInput.readOnly = false;
+    if (registerHeading) registerHeading.textContent = "Register publishing registry";
+    if (registerSubmit) registerSubmit.textContent = "Register with RofR";
     if (registerMsg) {
       registerMsg.textContent = "";
       registerMsg.classList.remove("val-register-msg--warn");
@@ -150,15 +175,52 @@
   function applyRegistrationDefaults(data) {
     const idInput = document.getElementById("reg-oai-id");
     const titleInput = document.getElementById("reg-title");
-    if (idInput && data.suggested_oai_identifier) {
-      idInput.value = data.suggested_oai_identifier;
-    } else if (idInput) {
-      const ep = form?.querySelector("#endpoint")?.value || data.endpoint || "";
-      const host = ep ? new URL(ep).hostname.replace(/\./g, "/") : "";
-      if (host) idInput.placeholder = `ivo://${host}/registry`;
+    const isUpdate = data.mode === "update";
+
+    if (registerHeading) {
+      registerHeading.textContent = isUpdate
+        ? "Update publishing registry listing"
+        : "Register publishing registry";
     }
-    if (titleInput && data.suggested_title) {
-      titleInput.value = data.suggested_title;
+    if (registerSubmit) {
+      registerSubmit.textContent = isUpdate ? "Update listing" : "Register with RofR";
+    }
+
+    if (registerCurrentUrl) {
+      if (isUpdate && data.existing_entry?.harvest_access_url) {
+        registerCurrentUrl.hidden = false;
+        if (data.endpoint_changed) {
+          registerCurrentUrl.textContent =
+            `Current listed URL: ${data.existing_entry.harvest_access_url}. `
+            + `Validated URL: ${data.endpoint || ""}.`;
+        } else {
+          registerCurrentUrl.textContent =
+            `Current listed URL: ${data.existing_entry.harvest_access_url}.`;
+        }
+      } else {
+        registerCurrentUrl.hidden = true;
+        registerCurrentUrl.textContent = "";
+      }
+    }
+
+    if (idInput) {
+      idInput.readOnly = isUpdate;
+      if (isUpdate && data.existing_entry?.oai_identifier) {
+        idInput.value = data.existing_entry.oai_identifier;
+      } else if (data.suggested_oai_identifier) {
+        idInput.value = data.suggested_oai_identifier;
+      } else {
+        const ep = form?.querySelector("#endpoint")?.value || data.endpoint || "";
+        const host = ep ? new URL(ep).hostname.replace(/\./g, "/") : "";
+        if (host) idInput.placeholder = `ivo://${host}/registry`;
+      }
+    }
+    if (titleInput) {
+      if (isUpdate && data.existing_entry?.title && !data.suggested_title) {
+        titleInput.value = data.existing_entry.title;
+      } else if (data.suggested_title) {
+        titleInput.value = data.suggested_title;
+      }
     }
   }
 
@@ -262,10 +324,19 @@
       });
       const text = await resp.text();
       if (!resp.ok) throw new Error(text || "Registration failed");
+      let created = true;
+      try {
+        const payload = JSON.parse(text);
+        created = payload.created !== false;
+      } catch (_err) {
+        created = resp.status === 201;
+      }
       if (registerForm) registerForm.hidden = true;
       if (registerDone) {
         registerDone.hidden = false;
-        registerDone.textContent = "Registry registered successfully. It will appear on the home page.";
+        registerDone.textContent = created
+          ? "Registry registered successfully. It will appear on the home page."
+          : "Registry listing updated successfully. The home page will show the new URL.";
       }
     } catch (err) {
       if (registerDone) {

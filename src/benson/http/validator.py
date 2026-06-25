@@ -117,7 +117,7 @@ async def validator_job_eligibility(run_id: str, request: Request) -> JSONRespon
     run = await store.get(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Validation session not found")
-    return JSONResponse(eligibility_payload(run, settings))
+    return JSONResponse(await eligibility_payload(run, settings))
 
 
 @router.post("/validator/jobs/{run_id}/register")
@@ -129,7 +129,7 @@ async def validator_job_register(
 ) -> JSONResponse:
     settings = request.app.state.settings
     try:
-        rec = await register_publisher(
+        result = await register_publisher(
             run_id,
             oai_identifier=oai_identifier,
             title=title,
@@ -137,13 +137,16 @@ async def validator_job_register(
         )
     except RegistrationError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    status_code = 201 if result.created else 200
     return JSONResponse(
         {
-            "oai_identifier": rec.oai_identifier,
-            "title": rec.title,
-            "harvest_access_url": rec.harvest_access_url,
+            "created": result.created,
+            "oai_identifier": result.record.oai_identifier,
+            "title": result.record.title,
+            "harvest_access_url": result.record.harvest_access_url,
+            "updated_at": result.record.updated_at,
         },
-        status_code=201,
+        status_code=status_code,
     )
 
 

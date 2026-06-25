@@ -28,6 +28,7 @@ class PublisherRegistry:
     title: str
     harvest_access_url: str | None
     registered_at: str | None = None
+    updated_at: str | None = None
     validation_run_id: str | None = None
     last_checked_at: str | None = None
     check_status: str | None = None

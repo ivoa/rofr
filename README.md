@@ -60,6 +60,8 @@ benson --reload
 | `STATIC_DIR` | `./assets/static` | Static assets |
 | `PUBLISHERS_DATA_DIR` | `./data/publishers` | Publishers registry data directory |
 | `PUBLISHERS_REGISTRY_FILE` | `./data/publishers/publishers.json` | Publishers registry JSON file |
+| `SEARCHABLES_CACHE_DIR` | `./data/searchables` | RegTAP CSV cache directory (`registries.csv`) |
+| `SEARCHABLES_CACHE_MAX_AGE_SEC` | — | Cache TTL; unset means no expiry |
 | `REGISTRATION_MAX_FAILURES` | `0` | Max failures allowed for registration |
 | `REGISTRATION_MAX_WARNINGS` | `999999` | Max warnings allowed for registration |
 | `REGISTRATION_REQUIRE_BUILTIN_SCHEMAS` | on | Require built-in XSD schemas for registration |
@@ -153,4 +155,26 @@ docker compose up --build
 
 Then open `http://localhost:8000/` (landing page) or `http://localhost:8000/validator`.
 
-When the cache directory is empty, searchables are fetched live from `SEARCHABLES_REGTAP_SYNC_URL` if configured. An empty `publishers.json` is created automatically; register registries via the validator after a successful dry-run validation.
+When the cache directory is empty, searchables are fetched live from `SEARCHABLES_REGTAP_SYNC_URL` on the first home page load (or via `benson sync-searchables`), and the CSV response is written to `SEARCHABLES_CACHE_DIR/registries.csv` (or `SEARCHABLES_CACHE_FILE`). Subsequent loads use the cache until `SEARCHABLES_CACHE_MAX_AGE_SEC` expires. An empty `publishers.json` is created automatically; register registries via the validator after a successful dry-run validation.
+
+To warm the searchables cache without opening the home page:
+
+```bash
+SEARCHABLES_CACHE_DIR=./data/searchables benson sync-searchables
+```
+
+### Registering and updating publishing registries
+
+After a successful validation (zero failures, built-in XSD schemas enabled), the validator offers registration with the Registry of Registries. Submit the registry’s IVOA identifier and title; Benson stores the entry in `publishers.json` and serves it at `/list-publishers`.
+
+**Updates** use the same flow: validate the registry’s current OAI endpoint (for example after a host or domain change), then submit the same IVOA identifier and an updated title if needed. Benson detects the existing listing and updates `harvest_access_url` and `title` instead of rejecting the submission. The original `registered_at` timestamp is preserved; `updated_at` records when the listing last changed.
+
+Requirements for updates:
+
+- Validation must pass under the same policy as new registration (`REGISTRATION_MAX_FAILURES`, built-in schemas, and so on).
+- The live Identify identifier must match the stored IVOA identifier (prevents hijacking another listing).
+- The validated endpoint must not already belong to a different registered identifier.
+
+The IVOA identifier itself cannot be changed through this path; a registry with a new identity is a new listing.
+
+`benson check-publishers` may report URL drift in `check_detail` when a live harvest URL differs from the stored value. It does not update the catalogue automatically — re-validate and submit an update through the validator instead.

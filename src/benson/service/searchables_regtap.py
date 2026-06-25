@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import time
 from io import StringIO
 from pathlib import Path
@@ -14,6 +15,8 @@ from benson.config import Settings
 from benson.service.rofr_lists import SearchableRegistry
 
 logger = logging.getLogger("benson.service.searchables_regtap")
+
+DEFAULT_CACHE_FILENAME = "registries.csv"
 
 # Parity baseline: same SELECT as rofr.ivoa.net listSearchables.py.in
 DEFAULT_SEARCHABLES_ADQL = (
@@ -49,6 +52,14 @@ def parse_searchables_regtap_csv(text: str) -> list[SearchableRegistry]:
         fields_map = {"IVOA Identifier": ivoid, endpoint_label: access_url}
         out.append(SearchableRegistry(title=title, href=href or None, fields=fields_map))
     return out
+
+
+def _cache_write_path(settings: Settings) -> Path | None:
+    if settings.searchables_cache_file is not None:
+        return settings.searchables_cache_file
+    if settings.searchables_cache_dir is not None:
+        return settings.searchables_cache_dir / DEFAULT_CACHE_FILENAME
+    return None
 
 
 def _cache_path(settings: Settings) -> Path | None:
@@ -87,9 +98,26 @@ def _read_cache_if_usable(settings: Settings) -> list[SearchableRegistry] | None
     return parse_searchables_regtap_csv(text)
 
 
-async def fetch_searchables_from_regtap(
+def write_searchables_cache(settings: Settings, csv_text: str) -> Path | None:
+    """Persist RegTAP CSV to the configured cache path."""
+    path = _cache_write_path(settings)
+    if path is None:
+        return None
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(f"{path.suffix}.tmp")
+        tmp.write_text(csv_text, encoding="utf-8")
+        os.replace(tmp, path)
+        logger.info("searchables cache written: %s", path)
+        return path
+    except OSError as e:
+        logger.warning("searchables cache write failed: %s", e)
+        return None
+
+
+async def fetch_searchables_csv_from_regtap(
     client: httpx.AsyncClient, settings: Settings, *, timeout_sec: float
-) -> list[SearchableRegistry]:
+) -> str:
     query = settings.searchables_adql.strip() or DEFAULT_SEARCHABLES_ADQL
     payload = {
         "LANG": "ADQL",
@@ -103,7 +131,24 @@ async def fetch_searchables_from_regtap(
         timeout=timeout_sec,
     )
     r.raise_for_status()
-    return parse_searchables_regtap_csv(r.text)
+    return r.text
+
+
+async def fetch_searchables_from_regtap(
+    client: httpx.AsyncClient, settings: Settings, *, timeout_sec: float
+) -> list[SearchableRegistry]:
+    return parse_searchables_regtap_csv(
+        await fetch_searchables_csv_from_regtap(client, settings, timeout_sec=timeout_sec)
+    )
+
+
+async def refresh_searchables_cache(
+    client: httpx.AsyncClient, settings: Settings, *, timeout_sec: float
+) -> list[SearchableRegistry]:
+    """Fetch from RegTAP and write CSV cache."""
+    csv_text = await fetch_searchables_csv_from_regtap(client, settings, timeout_sec=timeout_sec)
+    write_searchables_cache(settings, csv_text)
+    return parse_searchables_regtap_csv(csv_text)
 
 
 async def load_searchables(
@@ -112,4 +157,4 @@ async def load_searchables(
     cached = _read_cache_if_usable(settings)
     if cached is not None:
         return cached
-    return await fetch_searchables_from_regtap(client, settings, timeout_sec=timeout_sec)
+    return await refresh_searchables_cache(client, settings, timeout_sec=timeout_sec)

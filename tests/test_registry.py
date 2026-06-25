@@ -159,7 +159,8 @@ def test_eligible_for_registration_thresholds(monkeypatch: pytest.MonkeyPatch) -
     assert "failure" in reason.lower()
 
 
-def test_eligibility_payload_report_all_passed(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.asyncio
+async def test_eligibility_payload_report_all_passed(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = Settings.from_env()
     root = R.registry_validation_root(status="completed", nfail="0", nwarn="0", nrec="0")
     harvest = R.harvest_validation_root("https://registry.example/oai", "fail warn rec")
@@ -176,13 +177,15 @@ def test_eligibility_payload_report_all_passed(monkeypatch: pytest.MonkeyPatch) 
         error_fmt="html",
         merged_validation=etree.ElementTree(root),
     )
-    payload = eligibility_payload(run, settings)
+    payload = await eligibility_payload(run, settings)
     assert payload["report_all_passed"] is True
     assert payload["registration_blocked_by"] == "builtin_schemas"
     assert payload["eligible"] is False
+    assert payload["mode"] == "create"
 
 
-def test_eligibility_payload_all_passed_and_eligible() -> None:
+@pytest.mark.asyncio
+async def test_eligibility_payload_all_passed_and_eligible() -> None:
     settings = Settings.from_env()
     root = R.registry_validation_root(status="completed", nfail="0", nwarn="0", nrec="0")
     harvest = R.harvest_validation_root("https://registry.example/oai", "fail warn rec")
@@ -201,10 +204,11 @@ def test_eligibility_payload_all_passed_and_eligible() -> None:
         identify_oai_identifier="ivo://registry.example/reg",
         identify_title="Example Registry",
     )
-    payload = eligibility_payload(run, settings)
+    payload = await eligibility_payload(run, settings)
     assert payload["report_all_passed"] is True
     assert payload["registration_blocked_by"] is None
     assert payload["eligible"] is True
+    assert payload["mode"] == "create"
     assert payload["suggested_oai_identifier"] == "ivo://registry.example/reg"
     assert payload["suggested_title"] == "Example Registry"
 
@@ -276,3 +280,318 @@ async def test_register_uses_identify_metadata_for_initial_check_fields(
     assert row.last_checked_at == row.registered_at
     assert row.live_oai_identifier == "ivo://identify/reg"
     assert row.live_title == "Identify Registry"
+
+
+def _validation_root() -> etree.ElementTree:
+    root = R.registry_validation_root(status="completed", nfail="0", nwarn="0", nrec="0")
+    harvest = R.harvest_validation_root("https://placeholder.example/oai", "fail warn rec")
+    tq = etree.SubElement(harvest, "testQuery", name="Identify", options="verb=Identify", role="Identify")
+    tq.append(R.ri_test(True, "OK"))
+    root.append(harvest)
+    return etree.ElementTree(root)
+
+
+@pytest.mark.asyncio
+async def test_update_url_after_validation(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://migrate/reg",
+            title="Migrate Registry",
+            harvest_access_url="https://old.migrate.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="upd-url",
+        endpoint="https://new.migrate.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://migrate/reg",
+        identify_title="Migrate Registry",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/upd-url/register",
+        data={"oai_identifier": "ivo://migrate/reg", "title": "Migrate Registry"},
+    )
+    assert reg.status_code == 200
+    body = reg.json()
+    assert body["created"] is False
+    rows = await ps.load()
+    row = next(r for r in rows if r.oai_identifier == "ivo://migrate/reg")
+    assert row.harvest_access_url == "https://new.migrate.example/oai"
+    assert row.registered_at == "2026-01-01T00:00:00Z"
+    assert row.updated_at is not None
+
+
+@pytest.mark.asyncio
+async def test_update_title_with_same_url(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://title/reg",
+            title="Old Title",
+            harvest_access_url="https://title.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="upd-title",
+        endpoint="https://title.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://title/reg",
+        identify_title="New Title",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/upd-title/register",
+        data={"oai_identifier": "ivo://title/reg", "title": "New Title"},
+    )
+    assert reg.status_code == 200
+    rows = await ps.load()
+    row = next(r for r in rows if r.oai_identifier == "ivo://title/reg")
+    assert row.title == "New Title"
+    assert row.harvest_access_url == "https://title.example/oai"
+    assert row.updated_at is not None
+
+
+@pytest.mark.asyncio
+async def test_update_blocked_by_identify_mismatch(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://victim/reg",
+            title="Victim Registry",
+            harvest_access_url="https://victim.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="upd-mismatch",
+        endpoint="https://attacker.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://attacker/reg",
+        identify_title="Attacker Registry",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/upd-mismatch/register",
+        data={"oai_identifier": "ivo://victim/reg", "title": "Victim Registry"},
+    )
+    assert reg.status_code == 409
+    rows = await ps.load()
+    row = next(r for r in rows if r.oai_identifier == "ivo://victim/reg")
+    assert row.harvest_access_url == "https://victim.example/oai"
+
+
+@pytest.mark.asyncio
+async def test_update_blocked_by_endpoint_conflict(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://owner/reg",
+            title="Owner Registry",
+            harvest_access_url="https://owner.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://other/reg",
+            title="Other Registry",
+            harvest_access_url="https://other.example/oai",
+            registered_at="2026-01-02T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="upd-conflict",
+        endpoint="https://other.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://owner/reg",
+        identify_title="Owner Registry",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/upd-conflict/register",
+        data={"oai_identifier": "ivo://owner/reg", "title": "Owner Registry"},
+    )
+    assert reg.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_create_still_blocks_duplicate_identifier(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://dup/reg",
+            title="Existing Registry",
+            harvest_access_url="https://existing.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="dup-id",
+        endpoint="https://fresh.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://fresh/reg",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/dup-id/register",
+        data={"oai_identifier": "ivo://dup/reg", "title": "Existing Registry"},
+    )
+    assert reg.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_create_still_blocks_duplicate_endpoint(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://taken/reg",
+            title="Taken Registry",
+            harvest_access_url="https://taken.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="dup-endpoint",
+        endpoint="https://taken.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://new/reg",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/dup-endpoint/register",
+        data={"oai_identifier": "ivo://new/reg", "title": "New Registry"},
+    )
+    assert reg.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_eligibility_payload_update_mode(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://elig/reg",
+            title="Eligibility Registry",
+            harvest_access_url="https://old.elig.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="elig-update",
+        endpoint="https://new.elig.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://elig/reg",
+        identify_title="Eligibility Registry",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    resp = await client.get("/api/v1/registry/publishers/eligibility/elig-update")
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload["mode"] == "update"
+    assert payload["eligible"] is True
+    assert payload["endpoint_changed"] is True
+    assert payload["existing_entry"]["oai_identifier"] == "ivo://elig/reg"
+    assert payload["update_blocked_by"] is None
+
+
+@pytest.mark.asyncio
+async def test_legacy_register_update(client: AsyncClient) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://legacy/reg",
+            title="Legacy Registry",
+            harvest_access_url="https://old.legacy.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+
+    run = HarvestRun(
+        run_id="legacy-upd",
+        endpoint="https://new.legacy.example/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_oai_identifier="ivo://legacy/reg",
+        identify_title="Legacy Registry",
+        merged_validation=_validation_root(),
+    )
+    await store.create(run)
+
+    reg = await client.get(
+        "/api/v1/registry-validate/harvest",
+        params={
+            "op": "register",
+            "runid": "legacy-upd",
+            "oai_identifier": "ivo://legacy/reg",
+            "title": "Legacy Registry",
+        },
+    )
+    assert reg.status_code == 200
+    body = reg.json()
+    assert body["created"] is False
+    rows = await ps.load()
+    row = next(r for r in rows if r.oai_identifier == "ivo://legacy/reg")
+    assert row.harvest_access_url == "https://new.legacy.example/oai"
