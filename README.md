@@ -42,7 +42,44 @@ benson --reload
 | GET | `/list-publishers` | Publishers OAI XML catalog |
 | GET | `/api/v1/registry/publishers` | Publishers registry (JSON) |
 | GET, POST | `/api/v1/registry-validate/harvest` | Harvest validation API |
-| POST | `/api/v1/registry-validate/voresource` | VOResource validation API |
+| POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation (see below) |
+
+### Standalone VOResource validation
+
+Validate one or more VOResource / Registry Interface XML documents without running a full OAI harvest. Useful for checking a single record extracted from a ListRecords response, or any standalone registry metadata file.
+
+**Endpoint:** `POST /api/v1/registry-validate/voresource`  
+**Content type:** `multipart/form-data`
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `record` | One of `record` or `recordURL` | File upload; repeat the field for multiple files (up to **10**). |
+| `recordURL` | One of `record` or `recordURL` | Space-separated `http`/`https` URLs to fetch (`file:` URLs are rejected). |
+| `format` | No | Response format: `html` (default), `xml`, or `text`. |
+| `show` | No | Severity filter for results (default: `fail warn rec`). |
+
+Validation always uses the bundled XSD catalog under `assets/schemas/` plus `checkVOResource.xsl`. The harvest validator’s **Use built-in XSD schemas** flag does not apply here.
+
+**Upload a local file:**
+
+```bash
+curl -sS -X POST 'http://localhost:8000/api/v1/registry-validate/voresource' \
+  -F 'format=xml' \
+  -F 'show=fail warn rec' \
+  -F 'record=@assets/standards/voresource.xml;type=text/xml'
+```
+
+**Fetch by URL:**
+
+```bash
+curl -sS -X POST 'http://localhost:8000/api/v1/registry-validate/voresource' \
+  -F 'format=xml' \
+  -F 'recordURL=https://example.org/registry/resource.xml'
+```
+
+**Multiple files** — repeat `-F 'record=@…'` up to ten times, or combine uploads with `recordURL`.
+
+Normative behaviour (legacy servlet name `/regvalidate/VOResourceValidater`): [docs/regvalidate-functional-contract.md](docs/regvalidate-functional-contract.md) §4. Sample response fixture and parity replay notes: [docs/samples/voresource-validater/](docs/samples/voresource-validater/).
 
 ### Environment
 

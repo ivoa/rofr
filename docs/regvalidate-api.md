@@ -31,6 +31,7 @@ Use **maintainer** documentation for the existing servlet application (Ivy/Ant *
 | Topic | Document |
 |-------|----------|
 | HTTP surface, session / `runid`, `op` catalogue, OAI ladder | [Functional contract §2–3](regvalidate-functional-contract.md#2-http-surface-compatibility) |
+| Standalone VOResource (`POST` multipart, Benson curl) | [Project README § Standalone VOResource](../README.md#standalone-voresource-validation), [functional contract §4](regvalidate-functional-contract.md#4-standalone-voresource-validator), [samples](samples/voresource-validater/README.md) |
 | `builtinSchemas`, [`docs/schemas`](schemas/) catalog | [Functional contract §2.3](regvalidate-functional-contract.md#23-optional-harvest-parameters), [§5](regvalidate-functional-contract.md#5-namespace-to-schema-file-mapping) |
 | Phase 1 OAI Explorer vs Phase 2 four verbs vs Phase 3 VOR | [Functional contract §3](regvalidate-functional-contract.md#3-oai-endpoint-verification-steps) |
 | **`docs/samples/`** parity captures + refresh script | [**samples/README.md**](samples/README.md), [**parity notes**](regvalidate-parity-notes.md) |

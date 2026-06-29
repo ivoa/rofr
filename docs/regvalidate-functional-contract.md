@@ -163,7 +163,7 @@ flowchart LR
 
 ## 4. Standalone VOResource validator
 
-**Endpoint:** `/regvalidate/VOResourceValidater`
+**Endpoint:** `/regvalidate/VOResourceValidater` (legacy Java WAR). Benson serves the same contract at **`POST /api/v1/registry-validate/voresource`** — see the [project README](../README.md#standalone-voresource-validation).
 
 **Supported interaction:** **`POST`** `multipart/form-data`.
 

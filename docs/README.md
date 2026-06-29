@@ -93,7 +93,7 @@ These are **catalog sources**, not the URLs submitted to the harvest validator. 
 | GET | `/validator/jobs/{run_id}` | Job status |
 | GET | `/validator/jobs/{run_id}/result` | HTML result view |
 | GET, POST | `/api/v1/registry-validate/harvest` | Harvest validation API (legacy-compatible session model) |
-| POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation API |
+| POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation ([README § Standalone VOResource](../README.md#standalone-voresource-validation)) |
 | GET | `/api/v1/registry/publishers` | Publishers registry (JSON) |
 
 ### HTTP surface — legacy Java WAR (posterity)
