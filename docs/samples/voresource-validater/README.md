@@ -22,7 +22,7 @@ From the repository root:
 curl -sS -X POST 'http://localhost:8000/api/v1/registry-validate/voresource' \
   -F 'format=xml' \
   -F 'show=fail warn rec' \
-  -F 'record=@assets/standards/voresource.xml;type=text/xml' \
+  -F 'record=@vo-resource-file.xml;type=text/xml' \
   -o /tmp/voresource-result.xml
 ```
 
