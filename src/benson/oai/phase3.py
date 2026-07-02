@@ -119,6 +119,41 @@ async def harvest_voresource_documents(
     return collected, stats
 
 
+def validate_one_voresource(
+    blob: bytes,
+    builtin_schemas: bool,
+    settings: settings
+) -> list[str]:
+    """validates a VOResource record from its XML source in blob.
+
+    This returns a list of error messages; if this is empty, the document
+    is valid by our tests.
+
+    Use for settings, use Settings.from_env().
+
+    If blob cannot be parsed, this will raise an etree.XMLSyntaxError.
+    """
+    el = etree.fromstring(
+        blob,
+        etree.XMLParser(no_network=True, resolve_entities=False))
+
+    # Standalone-ish rule: XSD always applies (contract §4).
+    # During harvest mimic same when builtinSchemas.
+    if builtin_schemas:
+        errs = xsd_validate.validate_element_tree(el, settings.schema_root)
+    else:
+        errs = []
+
+    xsl_path = settings.assets_root / "checkVOResource.xsl"
+    if xsl_path.is_file():
+        try:
+            _ = xslt_eval.transform(xsl_path, el)
+        except Exception:
+           pass
+
+    return errs
+
+
 def validate_voresource_documents(
     records: dict[str, bytes],
     show_status: str,
@@ -128,7 +163,6 @@ def validate_voresource_documents(
 ) -> tuple[etree._Element, HarvestStats]:
     root = R.vor_validation_root(show_status)
     stats = HarvestStats()
-    xsl_path = settings.assets_root / "checkVOResource.xsl"
 
     for rid, blob in records.items():
         tq = etree.SubElement(
@@ -142,17 +176,14 @@ def validate_voresource_documents(
         tq.set("ivo-id", rid)
 
         try:
-            el = etree.fromstring(blob, etree.XMLParser(no_network=True, resolve_entities=False))
+            errs = validate_one_voresource(
+                blob,
+                builtin_schemas,
+                settings)
         except etree.XMLSyntaxError as exc:
-            stats.nfail += 1
-            tq.append(err_test(str(exc)))
-            continue
-
-        # Standalone-ish rule: XSD always applies (contract §4). During harvest mimic same when builtinSchemas.
-        if builtin_schemas:
-            errs = xsd_validate.validate_element_tree(el, settings.schema_root)
-        else:
-            errs = []
+           stats.nfail += 1
+           tq.append(err_test(str(exc)))
+           continue
 
         if errs:
             stats.nfail += 1
@@ -162,12 +193,6 @@ def validate_voresource_documents(
                 bad.text += "…"
             tq.append(bad)
             continue
-
-        if xsl_path.is_file():
-            try:
-                _ = xslt_eval.transform(xsl_path, el)
-            except Exception:
-                pass
 
         stats.npass += 1
         tq.append(pass_test())

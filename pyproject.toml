@@ -7,7 +7,7 @@ name = "benson"
 version = "0.2.0"
 description = "IVOA registry OAI-PMH harvest and VOResource validator service"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
