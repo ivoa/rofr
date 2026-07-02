@@ -54,7 +54,7 @@ async def execute_harvest_validation(
         status="running",
         phase="ivoa",
     )
-    ivoa_root, identify_defaults = await phase2.build_ivoa_harvest_validation(
+    ivoa_root, identify_defaults, identify_state = await phase2.build_ivoa_harvest_validation(
         client,
         run.endpoint,
         ss,
@@ -97,6 +97,7 @@ async def execute_harvest_validation(
         ss,
         builtin_schemas=builtin,
         settings=settings,
+        xsl_params=identify_state,
     )
     phase3.append_harvest_failures(vor_root, harvest_stats.failures)
     vor_tree = etree.ElementTree(vor_root)
@@ -140,7 +141,7 @@ async def validate_ivoa_only(
     settings: Settings,
     client: httpx.AsyncClient,
 ) -> etree._ElementTree:
-    root, _defaults = await phase2.build_ivoa_harvest_validation(
+    root, _defaults, _identify_state = await phase2.build_ivoa_harvest_validation(
         client,
         run.endpoint,
         run.show_status,
@@ -184,10 +185,13 @@ def phase3_validate_only(
     show_status: str,
     builtin_schemas: bool,
     settings: Settings,
+    *,
+    xsl_params: dict[str, str] | None = None,
 ) -> tuple[etree._Element, phase3.HarvestStats]:
     return phase3.validate_voresource_documents(
         records,
         show_status,
         builtin_schemas=builtin_schemas,
         settings=settings,
+        xsl_params=xsl_params,
     )

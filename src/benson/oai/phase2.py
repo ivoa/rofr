@@ -104,7 +104,7 @@ async def build_ivoa_harvest_validation(
     timeout: float,
     builtin_schemas: bool,
     settings: Settings,
-) -> tuple[etree._Element, dict[str, str]]:
+) -> tuple[etree._Element, dict[str, str], dict[str, str]]:
     root = R.harvest_validation_root(endpoint.rstrip(), show_status)
 
     check_xsl = settings.assets_root / "checkIVOAOAI.xsl"
@@ -129,6 +129,8 @@ async def build_ivoa_harvest_validation(
         violations: list[str] = []
         if builtin_schemas:
             violations.extend(xsd_validate.validate_oai_response_envelope(raw, settings.schema_root))
+        else:
+            violations.extend(xsd_validate.validate_oai_response_declared(raw, settings.schema_root))
 
         try:
             parsed = etree.fromstring(raw, etree.XMLParser(no_network=True, resolve_entities=False))
@@ -171,4 +173,4 @@ async def build_ivoa_harvest_validation(
             msg = "OK" if ri_ok else _failure_message(role)
             tq.append(R.ri_test(ri_ok, msg))
 
-    return root, registration_defaults
+    return root, registration_defaults, identify_state

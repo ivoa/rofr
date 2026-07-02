@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 from urllib.parse import quote
 
@@ -119,12 +120,68 @@ async def harvest_voresource_documents(
     return collected, stats
 
 
+def _local_tag(el: etree._Element) -> str:  # noqa: SLF001
+    tag = el.tag
+    if not isinstance(tag, str):
+        return ""
+    if tag.startswith("{"):
+        return tag.rpartition("}")[2]
+    return tag
+
+
+def _rightnow_param() -> str:
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def _vor_xslt_params(
+    record_id: str,
+    show_status: str,
+    *,
+    extra: dict[str, str] | None = None,
+) -> dict[str, str]:
+    params = {
+        "showStatus": show_status,
+        "queryName": record_id,
+        "role": "resource",
+        "rightnow": _rightnow_param(),
+    }
+    if extra:
+        params.update(extra)
+    return params
+
+
+def _append_xslt_tests(
+    tq: etree._Element,  # noqa: SLF001
+    xout: etree._ElementTree,
+) -> list[etree._Element]:  # noqa: SLF001
+    appended: list[etree._Element] = []
+    for child in xout.getroot():
+        if _local_tag(child) != "test":
+            continue
+        tq.append(child)
+        appended.append(child)
+    return appended
+
+
+def _record_stats_for_tests(stats: HarvestStats, tests: list[etree._Element]) -> None:
+    if not tests:
+        return
+    statuses = [(t.get("status") or "pass").lower() for t in tests]
+    if any(s == "fail" for s in statuses):
+        stats.nfail += 1
+    elif any(s == "warn" for s in statuses):
+        stats.nwarn += 1
+    else:
+        stats.npass += 1
+
+
 def validate_voresource_documents(
     records: dict[str, bytes],
     show_status: str,
     *,
     builtin_schemas: bool,
     settings: Settings,
+    xsl_params: dict[str, str] | None = None,
 ) -> tuple[etree._Element, HarvestStats]:
     root = R.vor_validation_root(show_status)
     stats = HarvestStats()
@@ -148,11 +205,11 @@ def validate_voresource_documents(
             tq.append(err_test(str(exc)))
             continue
 
-        # Standalone-ish rule: XSD always applies (contract §4). During harvest mimic same when builtinSchemas.
+        # Bundled catalog when builtinSchemas; otherwise validate declared xsi:schemaLocation.
         if builtin_schemas:
             errs = xsd_validate.validate_element_tree(el, settings.schema_root)
         else:
-            errs = []
+            errs = xsd_validate.validate_element_tree_declared(el, settings.schema_root)
 
         if errs:
             stats.nfail += 1
@@ -164,8 +221,13 @@ def validate_voresource_documents(
             continue
 
         if xsl_path.is_file():
+            params = _vor_xslt_params(rid, show_status, extra=xsl_params)
             try:
-                _ = xslt_eval.transform(xsl_path, el)
+                xout = xslt_eval.transform(xsl_path, el, params=params)
+                tests = _append_xslt_tests(tq, xout)
+                if tests:
+                    _record_stats_for_tests(stats, tests)
+                    continue
             except Exception:
                 pass
 

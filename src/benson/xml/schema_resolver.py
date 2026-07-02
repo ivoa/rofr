@@ -38,41 +38,54 @@ IVOA_BUNDLE = "benson-ivoa-bundle.xsd"
 OAI_BUNDLE = "benson-oai-bundle.xsd"
 
 
-class BundledSchemaResolver(etree.Resolver):
-    """Map remote schemaLocation URLs to files under SCHEMA_ROOT."""
+def _build_url_map() -> dict[str, str]:
+    url_map = dict(_IMPORT_URL_TO_FILE)
+    for _ns, fname in NAMESPACE_SCHEMA_FILES.items():
+        url_map.setdefault(_ns.rstrip("/"), fname)
+        url_map.setdefault(_ns, fname)
+    return url_map
+
+
+def resolve_location_url(schema_root: Path, url: str) -> Path | None:
+    """Map a declared schemaLocation URL to a local file under SCHEMA_ROOT."""
+    schema_root = schema_root.resolve()
+    url = (url or "").strip()
+    if not url:
+        return None
+    url_map = _build_url_map()
+    candidates = [url, url.rstrip("/")]
+    if url.startswith("file:"):
+        candidates.append(Path(url[5:]).name)
+    for key in candidates:
+        fname = url_map.get(key)
+        if fname:
+            path = schema_root / fname
+            if path.is_file():
+                return path
+    base = Path(url).name
+    if base:
+        path = schema_root / base
+        if path.is_file():
+            return path
+    return None
+
+
+class SchemaResolver(etree.Resolver):
+    """Map schemaLocation URLs to schema files under SCHEMA_ROOT."""
 
     def __init__(self, schema_root: Path) -> None:
         self.schema_root = schema_root.resolve()
-        self._url_map = dict(_IMPORT_URL_TO_FILE)
-        for _ns, fname in NAMESPACE_SCHEMA_FILES.items():
-            self._url_map.setdefault(_ns.rstrip("/"), fname)
-            self._url_map.setdefault(_ns, fname)
 
     def resolve(self, system_url: str, _public_id: str, context) -> object | None:  # noqa: ANN001
-        url = (system_url or "").strip()
-        if not url:
-            return None
-        candidates = [url, url.rstrip("/")]
-        if url.startswith("file:"):
-            candidates.append(Path(url[5:]).name)
-        for key in candidates:
-            fname = self._url_map.get(key)
-            if fname:
-                path = self.schema_root / fname
-                if path.is_file():
-                    return self.resolve_filename(str(path), context)
-        # basename fallback (e.g. VOResource-v1.0.xsd)
-        base = Path(url).name
-        if base:
-            path = self.schema_root / base
-            if path.is_file():
-                return self.resolve_filename(str(path), context)
+        path = resolve_location_url(self.schema_root, system_url)
+        if path is not None:
+            return self.resolve_filename(str(path), context)
         return None
 
 
 def _parser_with_resolver(schema_root: Path) -> etree.XMLParser:
     parser = etree.XMLParser()
-    parser.resolvers.add(BundledSchemaResolver(schema_root))
+    parser.resolvers.add(SchemaResolver(schema_root))
     return parser
 
 
@@ -92,6 +105,20 @@ def oai_bundle_schema(schema_root_str: str) -> etree.XMLSchema:
     path = root / OAI_BUNDLE
     parser = _parser_with_resolver(root)
     return etree.XMLSchema(etree.parse(str(path), parser))
+
+
+@lru_cache(maxsize=32)
+def schema_from_location(schema_root_str: str, location: str) -> etree.XMLSchema | None:
+    """Compile XSD from a declared schemaLocation URL (offline resolution only)."""
+    root = Path(schema_root_str)
+    path = resolve_location_url(root, location)
+    if path is None:
+        return None
+    parser = _parser_with_resolver(root)
+    try:
+        return etree.XMLSchema(etree.parse(str(path), parser))
+    except etree.XMLSchemaParseError:
+        return None
 
 
 @lru_cache(maxsize=32)
