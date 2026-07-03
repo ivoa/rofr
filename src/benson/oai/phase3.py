@@ -211,6 +211,21 @@ def validate_voresource_documents(
     settings: Settings,
     xsl_params: dict[str, str] | None = None,
 ) -> tuple[etree._Element, HarvestStats]:
+    """Validate VOResource records from their XML sources in ``records``.
+
+    Note, this does not call validate_one_voresource for each record, to preserve 
+    the Element (``el``) in the current scope, and to capture
+    exceptions and add it to the test tree, rather than raising them individually.
+
+    Returns a validation root element and a stats object.
+    The stats object contains the number of failed and passed tests.
+    The validation root element is a tree of test elements, each containing a testQuery element.
+    The testQuery element contains a test element for each test that was run.
+    The test element contains the test name, the test status, and the test message.
+    The test message is a string that contains the error message if the test failed.
+    The test status is a string that contains the test status.
+    The test name is a string that contains the test name.
+    """
     root = R.vor_validation_root(show_status)
     stats = HarvestStats()
     xsl_path = settings.assets_root / "checkVOResource.xsl"
