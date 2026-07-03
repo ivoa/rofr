@@ -8,7 +8,27 @@ IVOA registry validator: OAI-PMH harvest checks, IVOA four-GET profile, VOResour
 
 Web UI colors and typography follow [ivoa.net](https://ivoa.net); design tokens live in [`assets/static/css/ivoa-theme.css`](assets/static/css/ivoa-theme.css).
 
+## Tests
+
+Run the tests locally:
+
+Environment setup:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
+source .venv/bin/activate
+```
+
+Execute tests:
+
+```bash
+pytest
+```
+
 ## Run
+
+Environment setup:
 
 ```bash
 python3 -m venv .venv
@@ -140,14 +160,6 @@ When the validator form enables **Use built-in XSD schemas**, phase 2 (IVOA four
 OAI responses are validated in two steps: embedded `description` / `metadata` / `about` payloads are checked against the appropriate IVOA XSDs (Registry Interface records use [`benson-ivoa-bundle.xsd`](assets/schemas/benson-ivoa-bundle.xsd) so `xsi:type` extensions such as `vg:Registry` resolve), then the OAI-PMH envelope is checked via [`benson-oai-bundle.xsd`](assets/schemas/benson-oai-bundle.xsd). Imports are resolved locally (no network). This matches the regvalidate functional contract intent; validating against `OAI-v2.xsd` alone is not sufficient for registry `Identify` responses that embed `ri:Resource` metadata.
 
 **Developer guide:** [docs/schemas-and-validation-assets.md](docs/schemas-and-validation-assets.md) — directory layout, bundle composition, namespace table, XSLT assets (`assets/validate/`), standards catalog (`assets/standards/`), and how each validation phase uses them.
-
-## Tests
-
-After installing with `.[dev]` (see **Run** above):
-
-```bash
-pytest
-```
 
 On Debian/Ubuntu, install system libraries for `lxml` if needed: `apt-get install libxml2 libxslt1.1`.
 
