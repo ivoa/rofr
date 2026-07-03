@@ -120,6 +120,34 @@ async def harvest_voresource_documents(
     return collected, stats
 
 
+def _xsd_errors_for_element(
+    el: etree._Element,  # noqa: SLF001
+    *,
+    builtin_schemas: bool,
+    settings: Settings,
+) -> list[str]:
+    if builtin_schemas:
+        return xsd_validate.validate_element_tree(el, settings.schema_root)
+    return xsd_validate.validate_element_tree_declared(el, settings.schema_root)
+
+
+def validate_one_voresource(
+    blob: bytes,
+    builtin_schemas: bool,
+    settings: Settings,
+) -> list[str]:
+    """Validate a VOResource record from its XML source in ``blob``.
+
+    Returns XSD error messages; an empty list means the document passed schema
+    validation. Raises ``etree.XMLSyntaxError`` when ``blob`` is not well-formed.
+    """
+    el = etree.fromstring(
+        blob,
+        etree.XMLParser(no_network=True, resolve_entities=False),
+    )
+    return _xsd_errors_for_element(el, builtin_schemas=builtin_schemas, settings=settings)
+
+
 def _local_tag(el: etree._Element) -> str:  # noqa: SLF001
     tag = el.tag
     if not isinstance(tag, str):
@@ -205,11 +233,7 @@ def validate_voresource_documents(
             tq.append(err_test(str(exc)))
             continue
 
-        # Bundled catalog when builtinSchemas; otherwise validate declared xsi:schemaLocation.
-        if builtin_schemas:
-            errs = xsd_validate.validate_element_tree(el, settings.schema_root)
-        else:
-            errs = xsd_validate.validate_element_tree_declared(el, settings.schema_root)
+        errs = _xsd_errors_for_element(el, builtin_schemas=builtin_schemas, settings=settings)
 
         if errs:
             stats.nfail += 1
