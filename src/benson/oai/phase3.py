@@ -122,7 +122,7 @@ async def harvest_voresource_documents(
 def validate_one_voresource(
     blob: bytes,
     builtin_schemas: bool,
-    settings: settings
+    settings: Settings
 ) -> list[str]:
     """validates a VOResource record from its XML source in blob.
 
