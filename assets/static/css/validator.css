@@ -239,7 +239,8 @@
     }
     .val-test { margin: 0.3rem 0; padding: 0.35rem 0.45rem; border-radius: 6px; }
     .val-test--pass { color: var(--muted); }
-    .val-test--warn { background: var(--warn-bg); }
+    .val-test--warn { background: var(--warn-bg); border-left: 3px solid var(--warn-border); }
+    .val-test--rec { background: var(--accent-soft); border-left: 3px solid var(--accent-border); }
     .val-test--fail { background: #fdeeee; border-left: 3px solid #c53030; }
     .val-test-item { font-size: 0.85em; margin-right: 0.35rem; }
     .val-ignored-note {
