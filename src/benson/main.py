@@ -151,10 +151,25 @@ def _run_sync_searchables(args: argparse.Namespace) -> None:
         print(f"Searchables cache refreshed ({count} registries).")
 
 
+def _run_generate_vocabulary_xsl(args: argparse.Namespace) -> None:
+    from benson.config import Settings
+    from benson.oai.vocabulary_xslt import generate
+
+    settings = Settings.from_env()
+    out_path = generate(settings.assets_root)
+    print(f"Wrote {out_path}")
+
+
 def main() -> None:
     if len(sys.argv) == 1 or (
         len(sys.argv) > 1
-        and sys.argv[1] not in ("serve", "check-publishers", "sync-searchables")
+        and sys.argv[1]
+        not in (
+            "serve",
+            "check-publishers",
+            "sync-searchables",
+            "generate-vocabulary-xsl",
+        )
     ):
         sys.argv.insert(1, "serve")
 
@@ -196,6 +211,11 @@ def main() -> None:
         help="Print result as JSON",
     )
 
+    subparsers.add_parser(
+        "generate-vocabulary-xsl",
+        help="Regenerate assets/validate/validateVocabularies.xsl from IVOA vocabularies",
+    )
+
     args = parser.parse_args()
     if args.command in (None, "serve"):
         _run_serve(args)
@@ -203,6 +223,8 @@ def main() -> None:
         _run_check_publishers(args)
     elif args.command == "sync-searchables":
         _run_sync_searchables(args)
+    elif args.command == "generate-vocabulary-xsl":
+        _run_generate_vocabulary_xsl(args)
     else:
         parser.error(f"unknown command: {args.command}")
 
