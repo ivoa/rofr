@@ -8,7 +8,7 @@
                 exclude-result-prefixes="vr vg ri oai xsi"
                 version="1.0">
 
-   <xsl:import href="testsVOResource-v1_0.xsl"/>
+   <xsl:import href="testsVOResource.xsl"/>
    <xsl:import href="validationCommon.xsl"/>
 
    <xsl:output method="xml" encoding="UTF-8" indent="yes"

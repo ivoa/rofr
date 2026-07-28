@@ -136,11 +136,10 @@ These stylesheets implement IVOA registry **business rules** that XSD alone does
 |------|---------|------|
 | `checkIVOAOAI.xsl` | Phase 2 | Profile tests on OAI GET responses (`Identify`, `ListMetadataFormats`, `ListSets`, `ListRecords`). Emits `<test item="RI3.1.1" …>` elements. |
 | `checkVOResource.xsl` | Phase 3 | Additional constraints on harvested VOResource records. Emits `<test item="VRvalid" …>`. |
+| `testsVOResource.xsl` | (imported) | VOResource business-rule templates (`coretests` / `restests` / `captests`) used by both check stylesheets |
 | `validationCommon.xsl` | (imported) | Shared helpers for the check stylesheets |
 
 If XSLT processing fails or the stylesheet is missing, phase 2/3 fall back to simpler pass/fail heuristics (HTTP status and absence of OAI error codes).
-
-**Note:** `checkIVOAOAI.xsl` references `testsVOResource-v1_0.xsl` from the legacy Java tree; that file is **not** shipped under `assets/validate/`. Import failures are caught and the code falls back to non-XSLT checks.
 
 ---
 
