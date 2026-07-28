@@ -119,6 +119,21 @@ async def harvest_voresource_documents(
     return collected, stats
 
 
+def _xslt_fail_messages(xout: etree._ElementTree) -> list[str]:  # noqa: SLF001
+    """Collect fail-status ``<test>`` messages from a checkVOResource result."""
+    errs: list[str] = []
+    root = xout.getroot()
+    if root is None:
+        return errs
+    for test in root.findall("test"):
+        if (test.get("status") or "").strip().lower() != "fail":
+            continue
+        item = (test.get("item") or "VRvalid").strip()
+        desc = (test.text or "").strip()
+        errs.append(f"{item}: {desc}" if desc else item)
+    return errs
+
+
 def validate_one_voresource(
     blob: bytes,
     builtin_schemas: bool,
@@ -145,12 +160,17 @@ def validate_one_voresource(
         errs = []
 
     xsl_path = settings.assets_root / "checkVOResource.xsl"
-    if xsl_path.is_file():
-        try:
-            _ = xslt_eval.transform(xsl_path, el)
-        except Exception:
-           pass
+    if not xsl_path.is_file():
+        return errs
 
+    try:
+        xout = xslt_eval.transform(xsl_path, el)
+    except etree.LxmlError:
+        # Stylesheet missing imports / apply failure: fall back to XSD-only
+        # (see docs/schemas-and-validation-assets.md).
+        return errs
+
+    errs.extend(_xslt_fail_messages(xout))
     return errs
 
 
