@@ -164,7 +164,11 @@ def validate_one_voresource(
         return errs
 
     try:
-        xout = xslt_eval.transform(xsl_path, el)
+        xout = xslt_eval.transform(
+            xsl_path,
+            el,
+            params={"rightnow": xslt_eval.rightnow()},
+        )
     except etree.LxmlError:
         # Stylesheet missing imports / apply failure: fall back to XSD-only
         # (see docs/schemas-and-validation-assets.md).
