@@ -4,7 +4,7 @@
                 exclude-result-prefixes="vr vg ri oai xsi"
                 version="1.0">
 
-   <xsl:import href="testsVOResource-v1_0.xsl"/>
+   <xsl:import href="testsVOResource.xsl"/>
    <xsl:import href="validateVocabularies.xsl"/>
    <xsl:import href="validationCommon.xsl"/>
 
@@ -13,8 +13,9 @@
 
    <!--
      -  the date and time for the execution of this validater.  This is used
-     -  to ensure that stated dates are indeed in the past.  If not
-     -  its an empty string, the test will not be done.
+     -  to ensure that stated dates are indeed in the past.  If this is an
+     -  empty string, the past-date test will not be done.  Callers should
+     -  pass the current UTC time as yyyy-MM-dd'T'HH:mm:ss.
      -->
    <xsl:param name="rightnow"></xsl:param>
 
