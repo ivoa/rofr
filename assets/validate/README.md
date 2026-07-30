@@ -1,6 +1,8 @@
 # Validation stylesheets (XSLT)
 
 Default **`ASSETS_ROOT`**: XSLT 1.0 stylesheets for IVOA registry rules beyond XSD.
+These files are required for validation; a missing or unloadable stylesheet fails hard
+(see [`docs/schemas-and-validation-assets.md`](../../docs/schemas-and-validation-assets.md)).
 
 | File | Role |
 |------|------|

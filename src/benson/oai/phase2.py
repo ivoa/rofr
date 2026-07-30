@@ -107,13 +107,13 @@ async def build_ivoa_harvest_validation(
 ) -> tuple[etree._Element, dict[str, str]]:
     root = R.harvest_validation_root(endpoint.rstrip(), show_status)
 
-    check_xsl = settings.assets_root / "checkIVOAOAI.xsl"
+    check_xsl = xslt_eval.require_stylesheet(settings.assets_root / "checkIVOAOAI.xsl")
     identify_state: dict[str, str] = {}
     registration_defaults: dict[str, str] = {}
 
     for role, qp in IVOA_CHECKS:
         qp_body = qp.lstrip().lstrip("?")
-        status, raw, codes, parse_err = await fetch_oai(client, endpoint, qp_body, timeout=timeout)
+        status, raw, _codes, parse_err = await fetch_oai(client, endpoint, qp_body, timeout=timeout)
 
         tq = etree.SubElement(root, "testQuery", name=role, options=qp, role=role)
 
@@ -140,7 +140,6 @@ async def build_ivoa_harvest_validation(
             identify_state = extract_identify_state(parsed)
             registration_defaults = identify_registration_defaults(parsed)
 
-        used_xslt = False
         if violations:
             tq.append(
                 R.ri_test(
@@ -150,33 +149,23 @@ async def build_ivoa_harvest_validation(
             )
             continue
 
-        if check_xsl.is_file():
-            xsl_params: dict[str, str] = {
-                "expectError": "false",
-                "queryType": role,
-                "queryName": role,
-                "baseurl": endpoint.rstrip().rstrip("?"),
-                "showStatus": show_status,
-            }
-            if role == "ListRecords" and identify_state:
-                xsl_params.update(identify_state)
-            # Always set last so Identify-derived params cannot clobber it.
-            xsl_params["rightnow"] = xslt_eval.rightnow()
-            try:
-                xout = xslt_eval.transform(
-                    check_xsl,
-                    parsed,
-                    params=xsl_params,
-                )
-                for child in xout.getroot():
-                    used_xslt = True
-                    tq.append(child)
-            except Exception:
-                used_xslt = False
-
-        if not used_xslt:
-            ri_ok = not codes
-            msg = "OK" if ri_ok else _failure_message(role)
-            tq.append(R.ri_test(ri_ok, msg))
+        xsl_params: dict[str, str] = {
+            "expectError": "false",
+            "queryType": role,
+            "queryName": role,
+            "baseurl": endpoint.rstrip().rstrip("?"),
+            "showStatus": show_status,
+        }
+        if role == "ListRecords" and identify_state:
+            xsl_params.update(identify_state)
+        # Always set last so Identify-derived params cannot clobber it.
+        xsl_params["rightnow"] = xslt_eval.rightnow()
+        xout = xslt_eval.transform(
+            check_xsl,
+            parsed,
+            params=xsl_params,
+        )
+        for child in xout.getroot():
+            tq.append(child)
 
     return root, registration_defaults
