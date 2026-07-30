@@ -138,8 +138,22 @@ These stylesheets implement IVOA registry **business rules** that XSD alone does
 | `checkVOResource.xsl` | Phase 3 | Additional constraints on harvested VOResource records. Emits `<test item="VRvalid" …>`. |
 | `testsVOResource.xsl` | (imported) | VOResource business-rule templates (`coretests` / `restests` / `captests`) used by both check stylesheets |
 | `validationCommon.xsl` | (imported) | Shared helpers for the check stylesheets |
+| `validateVocabularies.xsl` | Phase 3 (imported) | Generated checks for vocabulary-controlled VOResource / VODataService fields |
+| `vocabularyControlled.csv` | (generator input) | Paths and IVOA vocabulary URLs used to build `validateVocabularies.xsl` |
 
 If XSLT processing fails or the stylesheet is missing, phase 2/3 fall back to simpler pass/fail heuristics (HTTP status and absence of OAI error codes).
+
+**Note:** `checkIVOAOAI.xsl` references `testsVOResource-v1_0.xsl` from the legacy Java tree; that file is **not** shipped under `assets/validate/`. Import failures are caught and the code falls back to non-XSLT checks.
+
+### Regenerating `validateVocabularies.xsl`
+
+The vocabulary stylesheet is generated offline and committed (not at server start), so standalone validation uses cached terms. When IVOA vocabularies or `vocabularyControlled.csv` change:
+
+```bash
+benson generate-vocabulary-xsl
+```
+
+Commit the updated `validateVocabularies.xsl`. Implementation: [`src/benson/oai/vocabulary_xslt.py`](../src/benson/oai/vocabulary_xslt.py).
 
 ---
 

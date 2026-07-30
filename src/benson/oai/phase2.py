@@ -151,9 +151,17 @@ async def build_ivoa_harvest_validation(
             continue
 
         if check_xsl.is_file():
-            xsl_params: dict[str, str] = {"expectError": "false"}
+            xsl_params: dict[str, str] = {
+                "expectError": "false",
+                "queryType": role,
+                "queryName": role,
+                "baseurl": endpoint.rstrip().rstrip("?"),
+                "showStatus": show_status,
+            }
             if role == "ListRecords" and identify_state:
                 xsl_params.update(identify_state)
+            # Always set last so Identify-derived params cannot clobber it.
+            xsl_params["rightnow"] = xslt_eval.rightnow()
             try:
                 xout = xslt_eval.transform(
                     check_xsl,

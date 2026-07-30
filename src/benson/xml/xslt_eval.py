@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from lxml import etree
+
+
+def rightnow() -> str:
+    """UTC timestamp for stylesheet ``rightnow`` params (legacy Java format)."""
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def transform(

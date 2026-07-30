@@ -120,6 +120,63 @@ def test_validate_one_xslt_pass_yields_no_errors(settings: Settings) -> None:
     assert errs == []
 
 
+def test_validate_one_passes_current_rightnow(settings: Settings) -> None:
+    """Past created/updated dates must not fail VRdate when rightnow is current."""
+    from benson.xml import xslt_eval
+
+    # Ensure the stylesheet actually loads (no silent XSLT fallback).
+    xslt_eval.transform(
+        settings.assets_root / "checkVOResource.xsl",
+        etree.fromstring(_MINIMAL_VOR),
+        params={"rightnow": xslt_eval.rightnow()},
+    )
+
+    errs = validate_one_voresource(
+        _MINIMAL_VOR,
+        builtin_schemas=False,
+        settings=settings,
+    )
+    assert not any(e.startswith("VRdate:") for e in errs)
+
+
+def test_validate_one_stale_rightnow_fails_vrdate(settings: Settings) -> None:
+    """A stale evaluation clock must still surface VRdate failures."""
+    from benson.xml import xslt_eval
+
+    out = xslt_eval.transform(
+        settings.assets_root / "checkVOResource.xsl",
+        etree.fromstring(_MINIMAL_VOR),
+        params={"rightnow": "2007-02-24T14:49:50"},
+    )
+    fails = [
+        t
+        for t in out.getroot().findall("test")
+        if t.get("item") == "VRdate" and t.get("status") == "fail"
+    ]
+    assert fails
+    assert any("created attribute" in (t.text or "") for t in fails)
+
+
+def test_validate_one_passes_rightnow_param_to_xslt(settings: Settings) -> None:
+    captured: dict[str, str] = {}
+
+    def _capture(xsl_path, el, *, params=None):  # noqa: ANN001
+        captured.update(params or {})
+        return _fake_xslt_tree()
+
+    with patch("benson.oai.phase3.xslt_eval.transform", side_effect=_capture):
+        with patch(
+            "benson.oai.phase3.xslt_eval.rightnow",
+            return_value="2026-07-29T12:00:00",
+        ):
+            validate_one_voresource(
+                _MINIMAL_VOR,
+                builtin_schemas=False,
+                settings=settings,
+            )
+
+    assert captured.get("rightnow") == "2026-07-29T12:00:00"
+
 def test_validate_one_voc_exercise_xsd_reports_errors(settings: Settings) -> None:
     blob = (_repo / "tests" / "fixtures" / "voc-exercise.vor").read_bytes()
     with patch(

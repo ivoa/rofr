@@ -403,6 +403,29 @@
    </xsl:template>
 
    <!--
+     -  Strip a trailing Z or numeric timezone offset from a time value so
+     -  comparisons against $rightnow (which has neither) stay numeric.
+     -->
+   <xsl:template name="stripTimezone">
+      <xsl:param name="value"/>
+      <xsl:choose>
+         <xsl:when test="contains($value, 'Z')">
+            <xsl:value-of select="substring-before($value, 'Z')"/>
+         </xsl:when>
+         <xsl:when test="contains($value, '+')">
+            <xsl:value-of select="substring-before($value, '+')"/>
+         </xsl:when>
+         <!-- time offsets like -05:00; avoid chopping HH:MM:SS at the first ':' -->
+         <xsl:when test="contains($value, '-') and string-length(substring-after($value, '-')) = 5 and contains(substring-after($value, '-'), ':')">
+            <xsl:value-of select="substring-before($value, '-')"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:value-of select="$value"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+
+   <!--
      -  return the date portion of a timestamp
      -->
    <xsl:template name="getDate">
@@ -413,7 +436,11 @@
          <xsl:when test="contains($datetime, $delim)">
             <xsl:value-of select="substring-before($datetime, $delim)"/>
          </xsl:when>
-         <xsl:otherwise><xsl:value-of select="$datetime"/></xsl:otherwise>
+         <xsl:otherwise>
+            <xsl:call-template name="stripTimezone">
+               <xsl:with-param name="value" select="$datetime"/>
+            </xsl:call-template>
+         </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
 
@@ -424,7 +451,9 @@
       <xsl:param name="datetime"/>
       <xsl:param name="delim">T</xsl:param>
 
-      <xsl:value-of select="substring-after($datetime, $delim)"/>
+      <xsl:call-template name="stripTimezone">
+         <xsl:with-param name="value" select="substring-after($datetime, $delim)"/>
+      </xsl:call-template>
    </xsl:template>
 
    <!--

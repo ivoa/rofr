@@ -4,14 +4,12 @@ Build an XSLT for validating one or more VOResource elements
 against IVOA vocabularies.
 
 This produces the file assets/validate/validateVocabularies.xsl and
-is supposed to be executed in validate whenever registry-relevant
-vocabularies change.  The current plan is that in a checkout of benson,
-you do::
+is supposed to be executed whenever registry-relevant vocabularies
+change (a few times a year at most).  From a checkout of benson::
 
-    cd assets/validate
-    python ../../src/benson/oai/vocabulary_xslt.py
+    benson generate-vocabulary-xsl
 
-Then git commit your changes and re-deploy.
+Then git commit the updated XSLT and re-deploy.
 
 [MD: this is fast enough that we could generate the XSLT at server
 start; but when people do stand-alone validation, I think I'd rather
@@ -24,6 +22,7 @@ assets/validate/vocabularyControlled.csv (see CONFIG_FILE).
 import functools
 import json
 import os
+from pathlib import Path
 from urllib import request
 
 IVOA_VOCABULARY_ROOT = "http://www.ivoa.net/rdf/"
@@ -149,27 +148,36 @@ def make_validator_for(xpath, attpath, voc_name, mandatory):
         voc_url="http://www.ivoa.net/rdf/"+voc_name)
 
 
-def read_config():
+def read_config(validate_dir):
     # returns a list of tuples as per CONFIG_FILE.
     # we should probably do some input validation, too.
     import csv
 
-    with open(CONFIG_FILE, newline="") as config_source:
+    config_path = Path(validate_dir) / CONFIG_FILE
+    with open(config_path, newline="") as config_source:
         return [tup
             for tup in csv.reader(config_source, skipinitialspace=True)]
 
 
-def main():
-    conf = read_config()
+def generate(validate_dir):
+    """Fetch vocabularies and write validateVocabularies.xsl under validate_dir."""
+    validate_dir = Path(validate_dir)
+    conf = read_config(validate_dir)
 
     fragments = []
     for vocspec in conf:
         fragments.append(
             make_validator_for(*vocspec))
 
-    with open("validateVocabularies.xsl", "w") as f:
+    out_path = validate_dir / "validateVocabularies.xsl"
+    with open(out_path, "w") as f:
         f.write((XSL_BODY.format(
             "\n\n".join(fragments))))
+    return out_path
+
+
+def main():
+    generate(".")
 
 
 if __name__=="__main__":
