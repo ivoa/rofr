@@ -217,7 +217,7 @@ Logic and presentation artifacts live in **`ivoaharvest/src/main/resources/net/i
 | `checkIVOAOAI.xsl` | IVOA OAI profile tests on harvested HTTP GET responses. |
 | `checkVOResource.xsl` | VOR constraints beyond XSD. |
 | `validationCommon.xsl` | Shared helpers. |
-| `testsVOResource-v1_0.xsl` | Additional VOR tests (if used). |
+| `testsVOResource.xsl` | Additional VOR tests (if used). |
 | `Results-Harvest-html.xsl` | Harvest results HTML view. |
 | `ResultsFrag-Harvest-html.xsl`, `SummaryFrag-Harvest-html.xsl` | UI fragments for browser transform. |
 | `Results-VOResource-html.xsl` | Standalone VOR HTML view. |

@@ -1,4 +1,4 @@
-"""Phase 3: ListRecords harvest loop (ivo_vor / ivo_managed) with XSD + optional XSLT."""
+"""Phase 3: ListRecords harvest loop (ivo_vor / ivo_managed) with XSD + XSLT."""
 
 from __future__ import annotations
 
@@ -160,20 +160,11 @@ def validate_one_voresource(
         errs = []
 
     xsl_path = settings.assets_root / "checkVOResource.xsl"
-    if not xsl_path.is_file():
-        return errs
-
-    try:
-        xout = xslt_eval.transform(
-            xsl_path,
-            el,
-            params={"rightnow": xslt_eval.rightnow()},
-        )
-    except etree.LxmlError:
-        # Stylesheet missing imports / apply failure: fall back to XSD-only
-        # (see docs/schemas-and-validation-assets.md).
-        return errs
-
+    xout = xslt_eval.transform(
+        xsl_path,
+        el,
+        params={"rightnow": xslt_eval.rightnow()},
+    )
     errs.extend(_xslt_fail_messages(xout))
     return errs
 

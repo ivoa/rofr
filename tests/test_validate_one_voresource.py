@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,6 +16,7 @@ os.environ.setdefault("ASSETS_ROOT", str(_repo / "assets" / "validate"))
 
 from benson.config import Settings  # noqa: E402
 from benson.oai.phase3 import validate_one_voresource, validate_voresource_documents  # noqa: E402
+from benson.xml.xslt_eval import XsltAssetsError  # noqa: E402
 
 _RI = "http://www.ivoa.net/xml/RegistryInterface/v1.0"
 _VR = "http://www.ivoa.net/xml/VOResource/v1.0"
@@ -66,20 +68,9 @@ def test_validate_one_surfaces_xsd_errors(settings: Settings) -> None:
 
 
 def test_validate_one_skips_xsd_when_builtin_disabled(settings: Settings) -> None:
-    with patch("benson.oai.phase3.xslt_eval.transform", side_effect=etree.XSLTParseError("boom")):
-        errs = validate_one_voresource(
-            _MINIMAL_VOR,
-            builtin_schemas=False,
-            settings=settings,
-        )
-    assert errs == []
-
-
-def test_validate_one_xslt_failure_falls_back(settings: Settings) -> None:
-    """XSLT load/apply errors must not crash; fall back to XSD-only results."""
     with patch(
         "benson.oai.phase3.xslt_eval.transform",
-        side_effect=etree.XSLTParseError("Cannot resolve URI testsVOResource.xsl"),
+        return_value=_fake_xslt_tree(),
     ):
         errs = validate_one_voresource(
             _MINIMAL_VOR,
@@ -87,6 +78,33 @@ def test_validate_one_xslt_failure_falls_back(settings: Settings) -> None:
             settings=settings,
         )
     assert errs == []
+
+
+def test_validate_one_missing_stylesheet_fails_hard(
+    settings: Settings,
+    tmp_path: Path,
+) -> None:
+    """Missing XSLT assets must fail hard, not silently skip rule checks."""
+    broken = replace(settings, assets_root=tmp_path)
+    with pytest.raises(XsltAssetsError, match="Required XSLT stylesheet missing"):
+        validate_one_voresource(_MINIMAL_VOR, builtin_schemas=False, settings=broken)
+
+
+def test_validate_one_stylesheet_load_failure_fails_hard(
+    settings: Settings,
+    tmp_path: Path,
+) -> None:
+    """Unloadable stylesheets (e.g. broken imports) must fail hard with fix guidance."""
+    (tmp_path / "checkVOResource.xsl").write_text(
+        '<?xml version="1.0"?>\n'
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">\n'
+        '  <xsl:import href="does-not-exist.xsl"/>\n'
+        "</xsl:stylesheet>\n",
+        encoding="utf-8",
+    )
+    broken = replace(settings, assets_root=tmp_path)
+    with pytest.raises(XsltAssetsError, match="Failed to load XSLT stylesheet"):
+        validate_one_voresource(_MINIMAL_VOR, builtin_schemas=False, settings=broken)
 
 
 def test_validate_one_collects_xslt_fail_tests(settings: Settings) -> None:
@@ -182,7 +200,7 @@ def test_validate_one_voc_exercise_xsd_reports_errors(settings: Settings) -> Non
     blob = (_repo / "tests" / "fixtures" / "voc-exercise.vor").read_bytes()
     with patch(
         "benson.oai.phase3.xslt_eval.transform",
-        side_effect=etree.XSLTParseError("unavailable"),
+        return_value=_fake_xslt_tree(),
     ):
         errs = validate_one_voresource(blob, builtin_schemas=True, settings=settings)
     assert any("stats" in e for e in errs)

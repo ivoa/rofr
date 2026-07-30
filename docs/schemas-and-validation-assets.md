@@ -136,13 +136,12 @@ These stylesheets implement IVOA registry **business rules** that XSD alone does
 |------|---------|------|
 | `checkIVOAOAI.xsl` | Phase 2 | Profile tests on OAI GET responses (`Identify`, `ListMetadataFormats`, `ListSets`, `ListRecords`). Emits `<test item="RI3.1.1" …>` elements. |
 | `checkVOResource.xsl` | Phase 3 | Additional constraints on harvested VOResource records. Emits `<test item="VRvalid" …>`. |
+| `testsVOResource.xsl` | (imported) | VOResource business-rule templates (`coretests` / `restests` / `captests`) used by both check stylesheets |
 | `validationCommon.xsl` | (imported) | Shared helpers for the check stylesheets |
 | `validateVocabularies.xsl` | Phase 3 (imported) | Generated checks for vocabulary-controlled VOResource / VODataService fields |
 | `vocabularyControlled.csv` | (generator input) | Paths and IVOA vocabulary URLs used to build `validateVocabularies.xsl` |
 
-If XSLT processing fails or the stylesheet is missing, phase 2/3 fall back to simpler pass/fail heuristics (HTTP status and absence of OAI error codes).
-
-**Note:** `checkIVOAOAI.xsl` references `testsVOResource-v1_0.xsl` from the legacy Java tree; that file is **not** shipped under `assets/validate/`. Import failures are caught and the code falls back to non-XSLT checks.
+XSLT is **required** for phase 2/3 validation. If a stylesheet is missing or cannot be loaded (for example a broken `xsl:import`), Benson raises `XsltAssetsError` with guidance to fix `ASSETS_ROOT` / regenerate vocabulary XSLT. Silent fall-back to XSD-only or HTTP heuristics is intentionally not used: a local install missing assets would otherwise “pass” services that fail on a complete RofR deployment.
 
 ### Regenerating `validateVocabularies.xsl`
 
