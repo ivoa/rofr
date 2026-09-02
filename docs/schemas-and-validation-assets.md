@@ -181,6 +181,14 @@ This is **metadata served by Benson**, not an XSD used to validate incoming harv
 
 ## Updating or extending schemas
 
+Each ivoa.net namespace URI serves the current Rec-stage schema for that major version. To overwrite the bundled copies:
+
+```bash
+benson refresh-schemas
+```
+
+Commit the updated files. Implementation: [`src/benson/xml/refresh_schemas.py`](../src/benson/xml/refresh_schemas.py).
+
 1. **Add or replace XSD** under `assets/schemas/`. Keep `schemaLocation` imports resolvable (same directory or update [`_IMPORT_URL_TO_FILE`](../src/benson/xml/schema_resolver.py)).
 2. **Register new namespaces** in [`NAMESPACE_SCHEMA_FILES`](../src/benson/xml/catalog.py) if elements appear as embedded OAI payloads or harvested records.
 3. **If the namespace participates in `xsi:type` extension chains** on `ri:Resource`, add an `<xs:import>` to `benson-ivoa-bundle.xsd`.
