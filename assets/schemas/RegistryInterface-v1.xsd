@@ -17,7 +17,7 @@
            identifier references to resources.
          </xs:documentation>
          <xs:documentation>
-           This is used to transmitting multiple resource descriptions
+           This is used to transmit multiple resource descriptions
            resulting from a query.
          </xs:documentation>
       </xs:annotation>

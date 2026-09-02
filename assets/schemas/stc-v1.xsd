@@ -2305,7 +2305,7 @@ Initial revision
             </xs:annotation>
             <xs:element name="a" nillable="true">
               <xs:annotation>
-                <xs:documentation>Semi-major axis for elliptical (closed) orbits (1&gt;e&gt;=0) only; for parabolic or hyperbolic orbits us periapsis distance q</xs:documentation>
+                <xs:documentation>Semi-major axis for elliptical (closed) orbits (1>e>=0) only; for parabolic or hyperbolic orbits us periapsis distance q</xs:documentation>
               </xs:annotation>
               <xs:complexType>
                 <xs:complexContent>
@@ -2317,7 +2317,7 @@ Initial revision
             </xs:element>
             <xs:element name="q" nillable="true">
               <xs:annotation>
-                <xs:documentation>Periapsis distance; required (instead of a) for open orbits (e&gt;=1)</xs:documentation>
+                <xs:documentation>Periapsis distance; required (instead of a) for open orbits (e>=1)</xs:documentation>
               </xs:annotation>
               <xs:complexType>
                 <xs:complexContent>
@@ -3588,7 +3588,7 @@ Or, alternatively, using a single STC type to generate a document:
     <MySTC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.ivoa.net/xml/STC/stc-v1.30.xsd" 
         xmlns:xlink="http://www.w3.org/1999/xlink" 
-        xsi:schemaLocation="http://www.ivoa.net/xml/STC/stc-v1.30.xsd"
+        xsi:schemaLocation="http://www.ivoa.net/xml/STC/stc-v1.30.xsd stc-v1.30.xsd" 
         xsi:type="stcXXXType">
         ...
     </MySTC>
