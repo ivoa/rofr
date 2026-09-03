@@ -15,3 +15,11 @@ Quick reference:
 | `*.xsd` | Individual namespace schemas (see doc for full table) |
 
 Namespace URI → filename mapping: [`src/benson/xml/catalog.py`](../../src/benson/xml/catalog.py).
+
+To replace ivoa.net schemas with the current Rec-stage documents those namespace URLs serve:
+
+```bash
+benson refresh-schemas
+```
+
+Commit the updated files. Non-IVOA schemas (OAI, Dublin Core, W3C) are left alone.

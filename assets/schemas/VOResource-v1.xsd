@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://www.ivoa.net/xml/VOResource/v1.0" 
-           xmlns="http://www.w3.org/2001/XMLSchema" 
-           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-           xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" 
+<xs:schema targetNamespace="http://www.ivoa.net/xml/VOResource/v1.0"
+           xmlns="http://www.w3.org/2001/XMLSchema"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0"
            xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1"
            elementFormDefault="unqualified"
            attributeFormDefault="unqualified"
-           version="1.1">
+           version="1.2">
 
 <!-- NOTE: target namespace ends in v1.0 in order to not break 1.0 clients.
-This is nevertheless the 1.1 schema, as given by the version attribute.
+This is nevertheless the 1.2 schema, as given by the version attribute.
 For details, see http://ivoa.net/documents/Notes/XMLVers -->
 
    <xs:annotation>
@@ -19,7 +19,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
        <vm:targetPrefix>vr</vm:targetPrefix>
      </xs:appinfo>
       <xs:documentation>
-        An XML Schema describing a resource to be used in the Virtual 
+        An XML Schema describing a resource to be used in the Virtual
         Observatory Project.
 
         Please see http://www.ivoa.net/documents/latest/VOResource.html
@@ -36,7 +36,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
            writers should always include the timezone marker.  VOResource
            readers must interpret timestamps without a timezone marker as
            UTC.
-         </xs:documentation> 
+         </xs:documentation>
       </xs:annotation>
 
       <xs:restriction base="xs:dateTime">
@@ -49,9 +49,9 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
          <xs:documentation>
            A date stamp that can be given to a precision of either a
            day (type xs:date) or seconds (type xs:dateTime).  Where only a
-           date is given, it is to be interpreted as the span of the day 
+           date is given, it is to be interpreted as the span of the day
            on the UTC timezone if such distinctions are relevant.
-         </xs:documentation> 
+         </xs:documentation>
       </xs:annotation>
       <xs:union memberTypes="xs:date vr:UTCTimestamp"/>
    </xs:simpleType>
@@ -60,7 +60,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:annotation>
          <xs:documentation>
            Any entity or component of a VO application that is
-           describable and identifiable by an IVOA Identifier. 
+           describable and identifiable by an IVOA Identifier.
          </xs:documentation>
       </xs:annotation>
       <xs:sequence>
@@ -69,23 +69,23 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:documentation>
                   A numeric grade describing the quality of the
-                  resource description, when applicable, 
+                  resource description, when applicable,
                   to be used to indicate the confidence an end-user
                   can put in the resource as part of a VO application
-                  or research study. 
+                  or research study.
                </xs:documentation>
                <xs:documentation>
                   See vr:Validation for an explanation of the
-                  allowed levels.  
+                  allowed levels.
                </xs:documentation>
                <xs:documentation>
                   Note that when this resource is a Service, this
                   grade applies to the core set of metadata.
                   Capability and interface metadata, as well as the
                   compliance of the service with the interface
-                  standard, is rated by validationLevel tag in the 
+                  standard, is rated by validationLevel tag in the
                   capability element (see the vr:Service complex
-                  type).  
+                  type).
                </xs:documentation>
             </xs:annotation>
          </xs:element>
@@ -94,7 +94,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:appinfo>
                  <vm:dcterm>Title</vm:dcterm>
-               </xs:appinfo>           
+               </xs:appinfo>
                <xs:documentation>
                   the full name given to the resource
                </xs:documentation>
@@ -108,8 +108,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                </xs:documentation>
                <xs:documentation>
                  This name will be used where brief annotations for
-                 the resource name are required.  Applications may 
-                 use to refer to this resource in a compact display.   
+                 the resource name are required.  Applications may
+                 use it to refer to this resource in a compact display.
                </xs:documentation>
                <xs:documentation>
                  One word or a few letters is recommended.  No more
@@ -122,7 +122,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:appinfo>
                  <vm:dcterm>Identifier</vm:dcterm>
-               </xs:appinfo>           
+               </xs:appinfo>
                <xs:documentation>
                   Unambiguous reference to the resource conforming to the IVOA
                   standard for identifiers
@@ -135,9 +135,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:documentation>
                   A reference to this resource in a non-IVOA identifier
-                  scheme, e.g., DOI or bibcode.  Always use the an URI scheme
-                  here, e.g., doi:10.1016/j.epsl.2011.11.037.  For bibcodes,
-                  use a form like bibcode:2008ivoa.spec.0222P.
+                  scheme, e.g., DOI or bibcode.  See the VOResource
+                  specification for syntax constraints on these identifiers.
                </xs:documentation>
             </xs:annotation>
          </xs:element>
@@ -164,13 +163,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
          <xs:annotation>
             <xs:documentation>
               The UTC date and time this resource metadata description
-              was created. 
+              was created.
             </xs:documentation>
             <xs:documentation>
               This timestamp must not be in the future.  This time is
               not required to be accurate; it should be at least
               accurate to the day.  Any non-significant time fields
-              should be set to zero. 
+              should be set to zero.
             </xs:documentation>
          </xs:annotation>
       </xs:attribute>
@@ -184,7 +183,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
               This timestamp must not be in the future.  This time is
               not required to be accurate; it should be at least
               accurate to the day.  Any non-significant time fields
-              should be set to zero. 
+              should be set to zero.
             </xs:documentation>
          </xs:annotation>
       </xs:attribute>
@@ -202,7 +201,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                  <xs:annotation>
                    <xs:documentation>
                       resource is believed to be currently maintained, and its
-                      description is up to date (default). 
+                      description is up to date (default).
                    </xs:documentation>
                  </xs:annotation>
                </xs:enumeration>
@@ -227,11 +226,11 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:attribute name="version" type="xs:token">
          <xs:annotation>
             <xs:documentation>
-               The VOResource XML schema version 
+               The VOResource XML schema version
                against which this instance was written.
                Implementors should set this to the value of the version
                attribute of their schema's root (xs:schema) element.
-               Clients may assume version 1.0 if this attribute is 
+               Clients may assume version 1.0 if this attribute is
                missing.
             </xs:documentation>
          </xs:annotation>
@@ -242,11 +241,11 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
      <xs:annotation>
        <xs:documentation>
          The allowed values for describing the resource descriptions
-         and interfaces.  
+         and interfaces.
        </xs:documentation>
        <xs:documentation>
          See the RM (v1.1, section 4) for more guidance on the use of
-         these values.  
+         these values.
        </xs:documentation>
      </xs:annotation>
      <xs:restriction base="xs:integer">
@@ -256,7 +255,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:documentation>
               The resource has a description that is stored in a
               registry. This level does not imply a compliant
-              description. 
+              description.
             </xs:documentation>
           </xs:annotation>
         </xs:enumeration>
@@ -265,7 +264,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:documentation>
               In addition to meeting the level 0 definition, the
               resource description conforms syntactically to this
-              standard and to the encoding scheme used. 
+              standard and to the encoding scheme used.
             </xs:documentation>
           </xs:annotation>
         </xs:enumeration>
@@ -274,18 +273,18 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:documentation>
               In addition to meeting the level 1 definition, the
               resource description refers to an existing resource that
-              has demonstrated to be functionally compliant. 
+              has demonstrated to be functionally compliant.
             </xs:documentation>
             <xs:documentation>
               When the resource is a service, it is considered to exist
               and functionally compliant if use of the
               service accessURL responds without error when used as
               intended by the resource. If the service is a standard
-              one, it must also demonstrate the response is syntactically 
+              one, it must also demonstrate the response is syntactically
               compliant with the service standard in order to be
               considered functionally compliant. If the resource is
               not a service, then the ReferenceURL must be shown to
-              return a document without error. 
+              return a document without error.
             </xs:documentation>
           </xs:annotation>
         </xs:enumeration>
@@ -319,7 +318,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="Validation">
      <xs:annotation>
        <xs:documentation>
-         a validation stamp combining a validation level and the ID of 
+         a validation stamp combining a validation level and the ID of
          the validator.
        </xs:documentation>
      </xs:annotation>
@@ -330,7 +329,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
            <xs:annotation>
              <xs:documentation>
                The IVOA ID of the registry or organisation that
-               assigned the validation level.  
+               assigned the validation level.
              </xs:documentation>
            </xs:annotation>
          </xs:attribute>
@@ -380,8 +379,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
        </xs:documentation>
        <xs:documentation>
          This name will be used where brief annotations for
-         the resource name are required.  Applications may 
-         use to refer to this resource in a compact display.   
+         the resource name are required.  Applications may
+         use to refer to this resource in a compact display.
        </xs:documentation>
        <xs:documentation>
          One word or a few letters is recommended.  No more
@@ -408,20 +407,20 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                <vm:dcterm>Publisher</vm:dcterm>
              </xs:appinfo>
              <xs:documentation>
-               Entity (e.g. person or organisation) responsible for making the 
+               Entity (e.g. person or organisation) responsible for making the
                resource available
              </xs:documentation>
           </xs:annotation>
        </xs:element>
 
-       <xs:element name="creator" type="vr:Creator" 
+       <xs:element name="creator" type="vr:Creator"
                    minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
              <xs:appinfo>
                <vm:dcterm>Creator</vm:dcterm>
              </xs:appinfo>
              <xs:documentation>
-                The entity/ies (e.g. person(s) or organisation) primarily responsible 
+                The entity/ies (e.g. person(s) or organisation) primarily responsible
                 for creating the content or constitution of the resource.
              </xs:documentation>
              <xs:documentation>
@@ -443,7 +442,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
           </xs:annotation>
        </xs:element>
 
-       <xs:element name="date" type="vr:Date" 
+       <xs:element name="date" type="vr:Date"
                    minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
              <xs:appinfo>
@@ -451,10 +450,10 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
              </xs:appinfo>
              <xs:documentation>
                Date associated with an event in the life cycle of the
-               resource.  
+               resource.
              </xs:documentation>
              <xs:documentation>
-               This will typically be associated with the creation or 
+               This will typically be associated with the creation or
                availability (i.e., most recent release or version) of
                the resource.  Use the role attribute to clarify.
              </xs:documentation>
@@ -464,7 +463,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
        <xs:element name="version" type="xs:token" minOccurs="0">
           <xs:annotation>
              <xs:documentation>
-               Label associated with creation or availablilty of a version of 
+               Label associated with creation or availablilty of a version of
                a resource.
              </xs:documentation>
           </xs:annotation>
@@ -486,12 +485,14 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
      <xs:annotation>
        <xs:documentation>
          The name of a potentially registered resource.  That is, the entity
-         referred to may have an associated identifier.
+         referred to may have an associated identifier.  Resources
+         not registered in the VO Registry can be referenced using the
+         altIdentifier attribute.
        </xs:documentation>
      </xs:annotation>
 
      <xs:simpleContent>
-       <xs:extension base="xs:token"> 
+       <xs:extension base="xs:token">
 
          <xs:attribute name="ivo-id" type="vr:IdentifierURI">
             <xs:annotation>
@@ -501,9 +502,19 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             </xs:annotation>
          </xs:attribute>
 
-       </xs:extension>       
+         <xs:attribute name="altIdentifier" type="xs:anyURI">
+            <xs:annotation>
+              <xs:documentation>
+                A non-ivoid identifier for the resource referred to,
+                in particular a DOI.  See the VOResource specification
+                for syntax constraints on these identifiers.
+              </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+
+       </xs:extension>
      </xs:simpleContent>
-   </xs:complexType>   
+   </xs:complexType>
 
    <xs:complexType name="Contact">
      <xs:annotation>
@@ -555,9 +566,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
               maxOccurs="unbounded">
            <xs:annotation>
               <xs:documentation>
-                 A reference to this entitiy in a non-IVOA identifier
-                 scheme, e.g., orcid.  Always use a URI form including
-                 a scheme here.
+              	Deprecated as a child element.  Use the name
+              	attribute's altIdentifier attribute instead.
               </xs:documentation>
            </xs:annotation>
         </xs:element>
@@ -578,7 +588,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="Creator">
       <xs:annotation>
          <xs:documentation>
-            The entity (e.g. person or organisation) primarily responsible 
+            The entity (e.g. person or organisation) primarily responsible
             for creating something
          </xs:documentation>
       </xs:annotation>
@@ -594,7 +604,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   subsequent credits and acknowledgements.
 
                   This should be exactly one name, preferably last name
-                  first (as in "van der Waals, Johannes Diderik").
+                  first (as in “van der Waals, Johannes Diderik”).
               </xs:documentation>
            </xs:annotation>
         </xs:element>
@@ -602,14 +612,14 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
         <xs:element name="logo" type="xs:anyURI" minOccurs="0">
            <xs:annotation>
               <xs:documentation>
-                URL pointing to a graphical logo, which may be used to help 
+                URL pointing to a graphical logo, which may be used to help
                 identify the information source
               </xs:documentation>
               <xs:documentation>
                 A logo needs only be provided for the first occurrence.
-                When multiple logos are supplied via multiple creator 
+                When multiple logos are supplied via multiple creator
                 elements, the application is free to choose which to
-                use. 
+                use.
               </xs:documentation>
            </xs:annotation>
         </xs:element>
@@ -618,9 +628,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
               maxOccurs="unbounded">
            <xs:annotation>
               <xs:documentation>
-                 A reference to this entitiy in a non-IVOA identifier
-                 scheme, e.g., orcid.  Always use a URI form including
-                 a scheme here.
+              	Deprecated as a child element.  Use the name
+              	attribute's altIdentifier attribute instead.
               </xs:documentation>
            </xs:annotation>
         </xs:element>
@@ -641,31 +650,32 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="Date">
       <xs:simpleContent>
          <xs:extension base="vr:UTCDateTime">
-           <xs:attribute name="role" type="xs:string" default="representative">
+           <xs:attribute name="role" type="xs:string" default="Collected">
              <xs:annotation>
                <xs:documentation>
-                 A string indicating what the date refers to.  
+                 A string indicating what the date refers to.
                </xs:documentation>
                <xs:documentation>
-               	The value of role should be taken from the vocabulary 
+               	The value of role should be taken from the vocabulary
                	maintained at
                	http://www.ivoa.net/rdf/voresource/date_role.
                	This includes the traditional and deprecated strings
-                “creation”, indicating the date that the resource 
+                “creation”, indicating the date that the resource
                 itself was created, and “update”, indicating when the
                 resource was updated last, and the default value,
-                “representative”, meaning the date is a rough 
-                representation of the time coverage of the resource.
+                “Collected”, meaning the date is a rough
+                representation of the time coverage of the resource
+                (prefer coverage/temporal to convey this information).
                 The preferred terms from that vocabulary are the DataCite
-                Metadata terms.   It is expected that the vocabulary will 
+                Metadata terms.   It is expected that the vocabulary will
                 be kept synchronous with the corresponding list of terms
                 in the DataCite Metadata schema.
                </xs:documentation>
                <xs:documentation>
                  Note that this date refers to the resource; dates describing
                  the metadata description of the resource are handled by
-                 the “created” and “updated” attributes of the Resource 
-                 element. 
+                 the “created” and “updated” attributes of the Resource
+                 element.
                </xs:documentation>
              </xs:annotation>
            </xs:attribute>
@@ -685,14 +695,16 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
           <xs:annotation>
              <xs:appinfo>
                <vm:dcterm>Subject</vm:dcterm>
-             </xs:appinfo>           
+             </xs:appinfo>
              <xs:documentation>
-               a topic, object type, or other descriptive keywords 
-               about the resource.  
+               a topic, object type, or other descriptive keywords
+               about the resource.
              </xs:documentation>
              <xs:documentation>
-               Terms for Subject should be drawn from the Unified
-               Astronomy Thesaurus (http://astrothesaurus.org).
+             	The content of subject SHOULD be the fragment identifier of
+             	the URI of a concept in the IVOA UAT
+             	(http://www.ivoa.net/rdf/uat/), that is, a string like
+             	“virtual-observatories”.
              </xs:documentation>
           </xs:annotation>
        </xs:element>
@@ -701,12 +713,12 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
           <xs:annotation>
              <xs:appinfo>
                <vm:dcterm>Description</vm:dcterm>
-             </xs:appinfo>           
+             </xs:appinfo>
              <xs:documentation>
                An account of the nature of the resource
              </xs:documentation>
              <xs:documentation>
-               The description may include but is not limited to an abstract, 
+               The description may include but is not limited to an abstract,
                table of contents, reference to a graphical representation of
                content or a free-text account of the content.
 
@@ -725,27 +737,37 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                <vm:dcterm>Source</vm:dcterm>
              </xs:appinfo>
              <xs:documentation>
-                a bibliographic reference from which the present resource is 
-                derived or extracted.  
+                a bibliographic reference from which the present resource is
+                derived or extracted.
              </xs:documentation>
              <xs:documentation>
-                This is intended to point to an article in the published 
-                literature.  An ADS Bibcode is recommended as a value when 
-                available.    
-             </xs:documentation>
-          </xs:annotation>
-       </xs:element>
-       
-       <xs:element name="referenceURL" type="xs:anyURI">
-          <xs:annotation>
-             <xs:documentation>
-                URL pointing to a human-readable document describing this 
-                resource.   
+                This is intended to point to an article in the published
+                literature.  An ADS Bibcode is recommended as a value when
+                available.
              </xs:documentation>
           </xs:annotation>
        </xs:element>
 
-       <xs:element name="type" type="xs:token" 
+       <xs:element name="referenceURL">
+          <xs:annotation>
+             <xs:documentation>
+                URL pointing to a human-readable document describing this
+                resource.
+             </xs:documentation>
+             <xs:documentation>
+             	In order to ensure that users can actually retrieve the
+             	content, the schema enforces that this is an http or https
+             	URI.
+             </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+             <xs:restriction base="xs:anyURI">
+                <xs:pattern value="https?://.*"/>
+             </xs:restriction>
+          </xs:simpleType>
+       </xs:element>
+
+       <xs:element name="type" type="xs:token"
                    minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
              <xs:appinfo>
@@ -759,13 +781,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
           </xs:annotation>
        </xs:element>
 
-       <xs:element name="contentLevel" type="xs:token" 
+       <xs:element name="contentLevel" type="xs:token"
                    minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
              <xs:appinfo>
                <vm:dcterm>Subject</vm:dcterm>
                <vm:dcterm>Subject.ContentLevel</vm:dcterm>
-             </xs:appinfo>           
+             </xs:appinfo>
              <xs:documentation>
                 Description of the content level or intended audience.
                 Values for contentLevel should be taken from the controlled
@@ -775,17 +797,17 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
           </xs:annotation>
        </xs:element>
 
-       <xs:element name="relationship" type="vr:Relationship" 
+       <xs:element name="relationship" type="vr:Relationship"
                    minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
              <xs:documentation>
-               a description of a relationship to another resource.  
+               a description of a relationship to another resource.
              </xs:documentation>
           </xs:annotation>
        </xs:element>
-       
+
      </xs:sequence>
-      
+
    </xs:complexType>
 
    <xs:complexType name="Source">
@@ -794,9 +816,18 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
            <xs:attribute name="format" type="xs:string">
              <xs:annotation>
                <xs:documentation>
-                 The reference format.  Recognized values include “bibcode”, 
-                 referring to a standard astronomical bibcode 
-                 (http://cdsweb.u-strasbg.fr/simbad/refcode.html).  
+                 The reference format.  Recognized values include “bibcode”,
+                 referring to a standard astronomical bibcode
+                 (http://cdsweb.u-strasbg.fr/simbad/refcode.html), and
+                 “doi” for a Digital Object Identifier
+               </xs:documentation>
+               <xs:documentation>
+               	Since format already defines how to interpret source's
+               	values, these do not uses any prefixes, HTTP or otherwise.
+               	A resource would declare VOResource 1.1 as its source by
+               	writing 2018ivoa.spec.0625P with the bibcode format, and
+               	writing 10.5479/ADS/bib/2018ivoa.spec.0625P with the doi
+               	format.
                </xs:documentation>
              </xs:annotation>
            </xs:attribute>
@@ -819,14 +850,14 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   the named type of relationship
                </xs:documentation>
                <xs:documentation>
-                 The value  of relationshipType should be taken from the 
+                 The value  of relationshipType should be taken from the
                  vocabulary at
                  http://www.ivoa.net/rdf/voresource/relationship_type.
                </xs:documentation>
             </xs:annotation>
          </xs:element>
 
-         <xs:element name="relatedResource" type="vr:ResourceName" 
+         <xs:element name="relatedResource" type="vr:ResourceName"
                      minOccurs="1" maxOccurs="unbounded">
             <xs:annotation>
                <xs:documentation>
@@ -844,19 +875,19 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="Organisation">
       <xs:annotation>
          <xs:documentation>
-           A named group of one or more persons brought together to pursue 
-           participation in VO applications.  
+           A named group of one or more persons brought together to pursue
+           participation in VO applications.
          </xs:documentation>
          <xs:documentation>
-           According to the Resource Metadata Recommendation, organisations 
-           “can be hierarchical and range in size and scope.  At a high level, 
+           According to the Resource Metadata Recommendation, organisations
+           “can be hierarchical and range in size and scope.  At a high level,
            an organisation could be a university, observatory, or government
-           agency.  At a finer level, it could be a specific scientific 
+           agency.  At a finer level, it could be a specific scientific
            project, mission, or individual researcher.”
          </xs:documentation>
          <xs:documentation>
-           The main purpose of an organisation as a registered resource is 
-           to serve as a publisher of other resources.  
+           The main purpose of an organisation as a registered resource is
+           to serve as a publisher of other resources.
          </xs:documentation>
       </xs:annotation>
       <xs:complexContent>
@@ -870,8 +901,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                        <vm:dcterm>Subject</vm:dcterm>
                      </xs:appinfo>
                      <xs:documentation>
-                       the observatory or facility used to collect the data 
-                       contained or managed by this resource.  
+                       the observatory or facility used to collect the data
+                       contained or managed by this resource.
                      </xs:documentation>
                   </xs:annotation>
                </xs:element>
@@ -884,8 +915,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                        <vm:dcterm>Subject.Instrument</vm:dcterm>
                      </xs:appinfo>
                      <xs:documentation>
-                       the Instrument used to collect the data contain or 
-                       managed by a resource.  
+                       the Instrument used to collect the data contain or
+                       managed by a resource.
                      </xs:documentation>
                   </xs:annotation>
                </xs:element>
@@ -903,19 +934,19 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:annotation>
          <xs:documentation>
            a resource that can be invoked by a client to perform some action
-           on its behalf.  
+           on its behalf.
          </xs:documentation>
       </xs:annotation>
       <xs:complexContent>
          <xs:extension base="vr:Resource">
             <xs:sequence>
 
-               <xs:element name="rights" type="vr:Rights" 
+               <xs:element name="rights" type="vr:Rights"
                            minOccurs="0" maxOccurs="unbounded">
                   <xs:annotation>
                      <xs:appinfo>
                        <vm:dcterm>Rights</vm:dcterm>
-                     </xs:appinfo>           
+                     </xs:appinfo>
                      <xs:documentation>
                        Information about rights held in and over the resource.
                      </xs:documentation>
@@ -929,7 +960,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   </xs:annotation>
                </xs:element>
 
-               <xs:element name="capability" type="vr:Capability" 
+               <xs:element name="capability" type="vr:Capability"
                            minOccurs="0" maxOccurs="unbounded">
                   <xs:annotation>
                      <xs:documentation>
@@ -945,7 +976,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                      <xs:documentation>
                         A service can have many capabilities
                         associated with it, each reflecting different
-                        aspects of the functionality it provides.  
+                        aspects of the functionality it provides.
                      </xs:documentation>
                   </xs:annotation>
                </xs:element>
@@ -973,9 +1004,9 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   </xs:documentation>
                   <xs:documentation>
                      Where formal licenses are available, this URI can
-                     reference the full license text.  The IVOA may define
-                     standard URIs for a set of recommended
-                     licenses, in which case these should be used here.
+                     reference the full license text.  Use SPDX
+                     license URIs (https://spdx.org/licenses/) if at all
+                     possible.
                   </xs:documentation>
                </xs:annotation>
             </xs:attribute>
@@ -986,7 +1017,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="Capability">
       <xs:annotation>
          <xs:documentation>
-            a description of what the service does (in terms of 
+            a description of what the service does (in terms of
             context-specific behavior), and how to use it (in terms of
             an interface)
          </xs:documentation>
@@ -998,14 +1029,14 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:documentation>
                   A numeric grade describing the quality of the
-                  capability description and interface, when applicable, 
+                  capability description and interface, when applicable,
                   to be used to indicate the confidence an end-user
                   can put in the resource as part of a VO application
-                  or research study. 
+                  or research study.
                </xs:documentation>
                <xs:documentation>
                   See vr:ValidationLevel for an explanation of the
-                  allowed levels.  
+                  allowed levels.
                </xs:documentation>
             </xs:annotation>
          </xs:element>
@@ -1013,18 +1044,18 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
          <xs:element name="description" type="xs:string" minOccurs="0">
             <xs:annotation>
                <xs:documentation>
-                  A human-readable description of what this capability 
-                  provides as part of the over-all service 
+                  A human-readable description of what this capability
+                  provides as part of the over-all service
                </xs:documentation>
                <xs:documentation>
                   Use of this optional element is especially encouraged when
-                  this capability is non-standard and is one of several 
+                  this capability is non-standard and is one of several
                   capabilities listed.
                </xs:documentation>
             </xs:annotation>
          </xs:element>
 
-         <xs:element name="interface" type="vr:Interface" 
+         <xs:element name="interface" type="vr:Interface"
                      minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
                <xs:documentation>
@@ -1037,13 +1068,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   it via xsi:type.
                </xs:documentation>
                <xs:documentation>
-                  Multiple occurences can describe different interfaces to 
+                  Multiple occurences can describe different interfaces to
                   the logically same capability, i.e. data or functionality.
                   That is, the inputs accepted and the output provides should
                   be logically the same.  For example, a WebBrowser interface
-                  given in addition to a WebService interface would simply 
-                  provide an interactive, human-targeted interface to the 
-                  underlying WebService interface.  
+                  given in addition to a WebService interface would simply
+                  provide an interactive, human-targeted interface to the
+                  underlying WebService interface.
                </xs:documentation>
             </xs:annotation>
          </xs:element>
@@ -1052,14 +1083,14 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:attribute name="standardID" type="xs:anyURI">
          <xs:annotation>
             <xs:documentation>
-               A URI identifier for a standard service. 
+               A URI identifier for a standard service.
             </xs:documentation>
             <xs:documentation>
                This provides a unique way to refer to a service
                specification standard, such as a Simple Image Access service.
                The use of an IVOA identifier here implies that a
-               VOResource description of the standard is registered and 
-               accessible.  
+               VOResource description of the standard is registered and
+               accessible.
             </xs:documentation>
          </xs:annotation>
       </xs:attribute>
@@ -1075,7 +1106,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             to describe an actual interface.
          </xs:documentation>
          <xs:documentation>
-           Additional interface subtypes (beyond WebService and WebBrowser) are 
+           Additional interface subtypes (beyond WebService and WebBrowser) are
            defined in the VODataService schema.
          </xs:documentation>
       </xs:annotation>
@@ -1086,7 +1117,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:documentation>
                  The URL (or base URL) that a client uses to access the
-                 service.  How this URL is to be interpreted and used 
+                 service.  How this URL is to be interpreted and used
                  depends on the specific Interface subclass
                </xs:documentation>
                <xs:documentation>
@@ -1094,13 +1125,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                  accessURL, multiple accessURLs are deprecated.  Each
                  interface should have exactly one access URL.  Where an
                  interface has several mirrors, the  accessURL should
-                 reflect the “primary” (fastest, best-connected, 
+                 reflect the “primary” (fastest, best-connected,
                  best-maintained) site, the one that non-sophisticated
                  clients will go to.
 
                  Additional accessURLs should be put into mirrorURLs.
-                 Advanced clients can retrieve the mirrorURLs and 
-                 empirically determine interfaces closer to their 
+                 Advanced clients can retrieve the mirrorURLs and
+                 empirically determine interfaces closer to their
                  network location.
                </xs:documentation>
             </xs:annotation>
@@ -1111,13 +1142,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
             <xs:annotation>
                <xs:documentation>
                  A (base) URL of a mirror of this interface.  As with
-                 accessURL, how this URL is to be interpreted and used 
+                 accessURL, how this URL is to be interpreted and used
                  depends on the specific Interface subclass
                </xs:documentation>
                <xs:documentation>
                 This is intended exclusively for true mirrors, i.e.,
                 interfaces that are functionally identical to the
-                original interface and that are operated by the same 
+                original interface and that are operated by the same
                 publisher.  Other arrangements should be represented as
                 separate services linked by mirror-of relationships.
                </xs:documentation>
@@ -1125,7 +1156,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
          </xs:element>
 
          <xs:element name="securityMethod" type="vr:SecurityMethod"
-                     minOccurs="0" maxOccurs="unbounded">
+                     minOccurs="0" maxOccurs="1">
             <xs:annotation>
                <xs:documentation>
                   The mechanism the client must employ to authenticate
@@ -1133,7 +1164,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                </xs:documentation>
                <xs:documentation>
                   Services not requiring authentication must provide
-                  at least one interface definition without a 
+                  at least one interface definition without a
                   securityMethod defined.
                </xs:documentation>
             </xs:annotation>
@@ -1163,7 +1194,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:attribute name="version" type="xs:string">
          <xs:annotation>
             <xs:documentation>
-               The version of a standard interface specification that this 
+               The version of a standard interface specification that this
                interface complies with.  Most VO standards indicate the
                version in the standardID attribute of the capability.  For
                these standards, the version attribute should not be used.
@@ -1178,15 +1209,15 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                in the particular capability.  If the value is equal to
                "std" or begins with "std:", then the interface refers
                to a standard interface defined by the standard
-               referred to by the capability's standardID attribute.  
+               referred to by the capability's standardID attribute.
             </xs:documentation>
             <xs:documentation>
                For an interface complying with some registered
                standard (i.e. has a legal standardID), the role can be
-               matched against interface roles enumerated in standard 
+               matched against interface roles enumerated in standard
                resource record.  The interface descriptions in
-               the standard record can provide default descriptions 
-               so that such details need not be repeated here.  
+               the standard record can provide default descriptions
+               so that such details need not be repeated here.
             </xs:documentation>
          </xs:annotation>
       </xs:attribute>
@@ -1199,12 +1230,12 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
            <xs:annotation>
              <xs:documentation>
                A flag indicating whether this should be interpreted as a base
-               URL, a full URL, or a URL to a directory that will produce a 
+               URL, a full URL, or a URL to a directory that will produce a
                listing of files.
              </xs:documentation>
              <xs:documentation>
-               The default value assumed when one is not given depends on the 
-               context.  
+               The default value assumed when one is not given depends on the
+               context.
              </xs:documentation>
            </xs:annotation>
            <xs:simpleType>
@@ -1212,9 +1243,9 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                <xs:enumeration value="full">
                  <xs:annotation>
                    <xs:documentation>
-                     Assume a full URL--that is, one that can be invoked 
-                     directly without alteration.  This usually returns a 
-                     single document or file.  
+                     Assume a full URL--that is, one that can be invoked
+                     directly without alteration.  This usually returns a
+                     single document or file.
                    </xs:documentation>
                  </xs:annotation>
                </xs:enumeration>
@@ -1222,7 +1253,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                  <xs:annotation>
                    <xs:documentation>
                      Assume a base URL--that is, one requiring an extra portion
-                     to be appended before being invoked.  
+                     to be appended before being invoked.
                    </xs:documentation>
                  </xs:annotation>
                </xs:enumeration>
@@ -1230,7 +1261,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                  <xs:annotation>
                    <xs:documentation>
                      Assume URL points to a directory that will return a listing
-                     of files.  
+                     of files.
                    </xs:documentation>
                  </xs:annotation>
                </xs:enumeration>
@@ -1244,8 +1275,8 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="MirrorURL">
       <xs:annotation>
          <xs:documentation>
-            A URL of a mirror (i.e., a functionally identical additional 
-            service interface) to 
+            A URL of a mirror (i.e., a functionally identical additional
+            service interface) to
          </xs:documentation>
      </xs:annotation>
      <xs:simpleContent>
@@ -1270,7 +1301,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
          </xs:documentation>
          <xs:documentation>
             This type only allows one to refer to the mechanism via a
-            URI.  Derived types would allow for more metadata.  
+            URI.  Derived types would allow for more metadata.
          </xs:documentation>
       </xs:annotation>
 
@@ -1279,13 +1310,13 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
       <xs:attribute name="standardID" type="xs:anyURI">
          <xs:annotation>
             <xs:documentation>
-               A URI identifier for a standard security mechanism. 
+               A URI identifier for a standard security mechanism.
             </xs:documentation>
             <xs:documentation>
                This provides a unique way to refer to a security
-               specification standard.  The use of an IVOA identifier here 
-               implies that a VOResource description of the standard is 
-               registered and accessible.  
+               specification standard.  The use of an IVOA identifier here
+               implies that a VOResource description of the standard is
+               registered and accessible.
             </xs:documentation>
          </xs:annotation>
       </xs:attribute>
@@ -1295,7 +1326,7 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    <xs:complexType name="WebBrowser">
       <xs:annotation>
          <xs:documentation>
-            A (form-based) interface intended to be accesed interactively 
+            A (form-based) interface intended to be accesed interactively
             by a user via a web browser.
          </xs:documentation>
          <xs:documentation>
@@ -1328,12 +1359,12 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
                   <xs:annotation>
                      <xs:documentation>
                         The location of the WSDL that describes this
-                        Web Service.  If not provided, the location is 
+                        Web Service.  If not provided, the location is
                         assumed to be the accessURL with "?wsdl" appended.
                      </xs:documentation>
                      <xs:documentation>
-                        Multiple occurrences should represent mirror copies of 
-                        the same WSDL file.  
+                        Multiple occurrences should represent mirror copies of
+                        the same WSDL file.
                      </xs:documentation>
                   </xs:annotation>
                </xs:element>
@@ -1343,7 +1374,3 @@ For details, see http://ivoa.net/documents/Notes/XMLVers -->
    </xs:complexType>
 
 </xs:schema>
-
-<!-- 
-vim: sta:et:ts=3 
--->

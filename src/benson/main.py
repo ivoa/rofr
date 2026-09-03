@@ -160,6 +160,20 @@ def _run_generate_vocabulary_xsl(args: argparse.Namespace) -> None:
     print(f"Wrote {out_path}")
 
 
+def _run_refresh_schemas(args: argparse.Namespace) -> None:
+    from benson.config import Settings
+    from benson.xml.refresh_schemas import refresh
+
+    settings = Settings.from_env()
+    written, errors = refresh(settings.schema_root)
+    for path in written:
+        print(f"Wrote {path}")
+    for message in errors:
+        print(message, file=sys.stderr)
+    if errors:
+        sys.exit(1)
+
+
 def main() -> None:
     if len(sys.argv) == 1 or (
         len(sys.argv) > 1
@@ -169,6 +183,7 @@ def main() -> None:
             "check-publishers",
             "sync-searchables",
             "generate-vocabulary-xsl",
+            "refresh-schemas",
         )
     ):
         sys.argv.insert(1, "serve")
@@ -215,6 +230,10 @@ def main() -> None:
         "generate-vocabulary-xsl",
         help="Regenerate assets/validate/validateVocabularies.xsl from IVOA vocabularies",
     )
+    subparsers.add_parser(
+        "refresh-schemas",
+        help="Fetch current Rec XSDs from ivoa.net namespace URLs into SCHEMA_ROOT",
+    )
 
     args = parser.parse_args()
     if args.command in (None, "serve"):
@@ -225,6 +244,8 @@ def main() -> None:
         _run_sync_searchables(args)
     elif args.command == "generate-vocabulary-xsl":
         _run_generate_vocabulary_xsl(args)
+    elif args.command == "refresh-schemas":
+        _run_refresh_schemas(args)
     else:
         parser.error(f"unknown command: {args.command}")
 

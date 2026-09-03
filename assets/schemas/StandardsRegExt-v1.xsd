@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://www.ivoa.net/xml/StandardsRegExt/v1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vstd="http://www.ivoa.net/xml/StandardsRegExt/v1.0" xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="1.0pr3">
+<xs:schema targetNamespace="http://www.ivoa.net/xml/StandardsRegExt/v1.0" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" 
+           xmlns:vstd="http://www.ivoa.net/xml/StandardsRegExt/v1.0" 
+           xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1"
+           elementFormDefault="unqualified" attributeFormDefault="unqualified"
+           version="1.0pr3" >
 
    <xs:annotation>
       <xs:appinfo>
@@ -14,7 +20,8 @@
       </xs:documentation>
    </xs:annotation>
 
-   <xs:import namespace="http://www.ivoa.net/xml/VOResource/v1.0" schemaLocation="http://www.ivoa.net/xml/VOResource/v1.0"/>
+   <xs:import namespace="http://www.ivoa.net/xml/VOResource/v1.0" 
+              schemaLocation="http://www.ivoa.net/xml/VOResource/v1.0"/>
 
    <xs:complexType name="Standard">
       <xs:annotation>
@@ -31,7 +38,8 @@
          <xs:extension base="vr:Resource">
             <xs:sequence>
  
-              <xs:element name="endorsedVersion" type="vstd:EndorsedVersion" maxOccurs="unbounded">
+              <xs:element name="endorsedVersion" type="vstd:EndorsedVersion" 
+                          maxOccurs="unbounded">
                 <xs:annotation>
                    <xs:documentation>
                      the version of the standard that is recommended for use.
@@ -44,7 +52,8 @@
                 </xs:annotation>
               </xs:element>
 
-              <xs:element name="schema" type="vstd:Schema" minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="schema" type="vstd:Schema" 
+                          minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                    <xs:documentation>
                      a description and pointer to a schema document
@@ -72,7 +81,8 @@
                 </xs:annotation>
               </xs:element>
 
-              <xs:element name="key" type="vstd:StandardKey" minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="key" type="vstd:StandardKey" 
+                          minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                    <xs:documentation>
                      a defined key associated with this standard.
@@ -195,7 +205,8 @@
       </xs:annotation>
 
       <xs:sequence>
-         <xs:element name="location" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+         <xs:element name="location" type="xs:anyURI" 
+                     minOccurs="1" maxOccurs="1">
             <xs:annotation>
                <xs:documentation>
                   A URL pointing to a document that formally defines
@@ -210,7 +221,8 @@
                </xs:documentation>
             </xs:annotation>
          </xs:element>
-         <xs:element name="description" type="xs:token" minOccurs="0" maxOccurs="1">
+         <xs:element name="description" type="xs:token" 
+                     minOccurs="0" maxOccurs="1" >
             <xs:annotation>
                <xs:documentation>
                   A human-readable description of what the schema
@@ -222,7 +234,8 @@
                </xs:documentation>
             </xs:annotation>
          </xs:element>
-         <xs:element name="example" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
+         <xs:element name="example" type="xs:anyURI" 
+                     minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
                <xs:documentation>
                   A URL pointing to a sample document that illustrates 
@@ -265,7 +278,8 @@
       <xs:complexContent>
          <xs:extension base="vstd:Standard">
             <xs:sequence>
-               <xs:element name="interface" type="vr:Interface" minOccurs="0" maxOccurs="unbounded">
+               <xs:element name="interface" type="vr:Interface"
+                           minOccurs="0" maxOccurs="unbounded">
                   <xs:annotation>
                     <xs:documentation>
                       an abstract description of one of the interfaces defined 
@@ -317,7 +331,8 @@
       <xs:complexContent>
          <xs:extension base="vr:Resource">
             <xs:sequence>
-               <xs:element name="key" type="vstd:StandardKey" maxOccurs="unbounded" minOccurs="1">
+               <xs:element name="key" type="vstd:StandardKey"
+                           maxOccurs="unbounded" minOccurs="1">
                  <xs:annotation>
                     <xs:documentation>
                       the name and definition of a key--a named concept, 
@@ -388,7 +403,8 @@
           </xs:documentation>
        </xs:annotation>
        <xs:restriction base="xs:string">
-          <xs:pattern value="([A-Za-z0-9;/\?:@&amp;=\+$,\-_\.!~\*'\(\)]|%[A-Fa-f0-9]{2})+"/>
+          <xs:pattern
+              value="([A-Za-z0-9;/\?:@&amp;=\+$,\-_\.!~\*'\(\)]|%[A-Fa-f0-9]{2})+"/>
        </xs:restriction>
     </xs:simpleType>
 </xs:schema>
