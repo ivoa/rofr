@@ -1,4 +1,4 @@
-# Benson documentation
+# Registry of Registries (Project Benson) documentation
 
 Documentation for the IVOA **Registry of Registries** validator: checking publishing-registry **OAI-PMH** endpoints, validating harvested **VOResource** records, and serving Benson’s own registry catalog over OAI.
 
@@ -120,6 +120,7 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 | [**regvalidate-parity-notes.md**](regvalidate-parity-notes.md) | **Edge cases and intentional quirks** when matching the legacy deployment: phase 3 iterator limits, sync vs background `maxVORInclude`, pseudo-JSON quoting, HTTP 500 paths, OAI Explorer dependence, and result XML without a published wrapper XSD. |
 | [**regvalidate-legacy-java-deployment.md**](regvalidate-legacy-java-deployment.md) | **Posterity only** — Ant/Ivy/Tomcat WAR build and deployment notes (`ivoaharvest`, `dalvalidate`). Ignore unless you need to inspect or reproduce the old Java stack. |
 | [**regvalidate-api.md**](regvalidate-api.md) | Short **quick-reference index** (subset of this README) with direct links into the functional contract sections. |
+| [**adr/README.md**](adr/README.md) | **Architecture decision records** — why Benson uses Python, FastAPI/Starlette/uvicorn, lxml, parity-first specs, legacy assets, and in-memory run state. |
 | [**samples/README.md**](samples/README.md) | Overview of **HTTP response fixtures** for parity testing and onboarding. |
 | [**samples/harvest-validater/README.md**](samples/harvest-validater/README.md) | **`HarvestValidater`** sample files: `StartSession`, `ValidateOAI` / `ValidateIVOA` XML, `GetStatus` JSON, and replay notes (`JSESSIONID`, pseudo-JSON). |
 | [**samples/harvest-validater/CAPTURE.md**](samples/harvest-validater/CAPTURE.md) | **`curl`** steps to refresh harvest-validater samples from a live deployment. |
@@ -132,3 +133,4 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 1. **Implementing or testing Benson** — [regvalidate-functional-contract.md](regvalidate-functional-contract.md) §2–3, then [schemas-and-validation-assets.md](schemas-and-validation-assets.md).
 2. **Matching legacy output** — [samples/](samples/), [regvalidate-parity-notes.md](regvalidate-parity-notes.md), and contract §8.
 3. **Legacy Java archaeology (optional)** — [regvalidate-legacy-java-deployment.md](regvalidate-legacy-java-deployment.md); only if you need the old WAR layout for parity or historical context.
+4. **Stack and technical choices** — [adr/README.md](adr/README.md) (FastAPI, lxml, parity strategy, and related ADRs).
