@@ -1,0 +1,33 @@
+---
+description: Prefer the smallest change that solves the request; no drive-by refactors or extra dependencies
+alwaysApply: true
+---
+
+# Minimal changes
+
+Prefer the smallest, focused change that meets the request. Match existing patterns. Do not expand scope.
+
+## Do
+
+- Touch only files required for the request.
+- Follow nearby naming, structure, and error-handling patterns.
+- When several approaches work, pick the simplest one that is adequate.
+- Add a dependency only when the existing stack cannot reasonably do the job.
+- Discuss architectural changes before making them.
+
+## Do not
+
+- Refactor, rename, or restyle unrelated code.
+- Edit files that are not part of the change.
+- Change APIs, layering, or project structure unless the request requires it and it has been discussed.
+- Preserve behavior unless the request is explicitly to change it.
+
+```python
+# ❌ BAD — drive-by cleanup in an unrelated helper
+def format_status(code: str) -> str:
+    return code.strip().upper()  # also rewrote this while fixing harvest jobs
+
+# ✅ GOOD — change only the harvest-job path you were asked to fix
+def enqueue_harvest_job(endpoint: str) -> str:
+    return jobs.submit(endpoint)
+```

@@ -40,6 +40,8 @@ benson --reload
 | POST | `/validator/jobs` | Start validation job |
 | GET | `/oai` | IVOA standards OAI-PMH catalog from `assets/standards` |
 | GET | `/list-publishers` | Publishers OAI XML catalog |
+
+For OAI-PMH gaps (`ivo_publishers`, POST, publisher record quality, tests), see [docs/oai-pmh-todo.md](docs/oai-pmh-todo.md).
 | GET | `/api/v1/registry/publishers` | Publishers registry (JSON) |
 | GET, POST | `/api/v1/registry-validate/harvest` | Harvest validation API |
 | POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation (see below) |

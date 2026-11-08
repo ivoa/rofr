@@ -4,6 +4,12 @@ Documentation for the IVOA **Registry of Registries** validator: checking publis
 
 The [project README](../README.md) covers how to run Benson, environment variables, and Docker. This folder holds the **behavioural contract**, **asset layout**, **parity fixtures**, and **legacy Java** maintainer notes.
 
+### IVOA Registry of Registries specification
+
+The IVOA document that describes RofR operations—registering publishing registries after validation, discovering publishers via OAI-PMH (`set=ivo_publishers`), and publishing IVOA standards records—is **[The Registry of Registries](https://www.ivoa.net/documents/Notes/RegistryOfRegistries/index.html)** (IVOA Note 1.0, [2007-06-28 release](https://www.ivoa.net/documents/Notes/RegistryOfRegistries/RegistryOfRegistries-1.0-20070628.html)). It is an IVOA **Note** (conventional practice), not a Recommendation; normative registry architecture and the RofR’s role as an OAI publishing registry appear in **[Registry Interfaces](https://www.ivoa.net/Documents/latest/RegistryInterface.html)** (§4.1).
+
+Benson's harvest validator and registration flow implement the checks and workflows described in that Note and in Registry Interfaces; detailed HTTP and phase behaviour for this codebase is in [regvalidate-functional-contract.md](regvalidate-functional-contract.md).
+
 ---
 
 ## Validation approach
@@ -84,6 +90,8 @@ Benson also **publishes** registry metadata over OAI-PMH for the Registry of Reg
 
 These are **catalog sources**, not the URLs submitted to the harvest validator. Environment variables `STANDARDS_DIR`, `OAI_REPOSITORY_NAME`, `OAI_REGISTRY_IDENTIFIER`, and related settings control how `/oai` identifies itself; see the [project README](../README.md).
 
+**OAI implementation status:** `/oai` implements the six OAI verbs for `ivo_managed` (standards catalog). Publisher discovery via `set=ivo_publishers` on the same base URL is still outstanding — see [oai-pmh-todo.md](oai-pmh-todo.md).
+
 ### HTTP surface — Benson (current)
 
 | Method | Path | Description |
@@ -115,6 +123,7 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 
 | Document | What it explains |
 |----------|------------------|
+| [**oai-pmh-todo.md**](oai-pmh-todo.md) | **Remaining work** to complete Benson’s own OAI-PMH publishing endpoints (`/oai`, `/list-publishers`): `ivo_publishers`, POST, publisher metadata quality, tests, and documentation. |
 | [**regvalidate-functional-contract.md**](regvalidate-functional-contract.md) | **Normative behaviour** for a rewrite: HTTP surface, session/`runid` model, `op` catalogue, three validation phases, `builtinSchemas`, namespace-to-XSD map, XSLT roles, live response shapes, and related IVOA standards links. Start here when implementing or comparing behaviour. |
 | [**schemas-and-validation-assets.md**](schemas-and-validation-assets.md) | **Developer guide** to bundled XSDs ([`assets/schemas/`](../assets/schemas/)), XSLT rules ([`assets/validate/`](../assets/validate/)), standards records ([`assets/standards/`](../assets/standards/)), and how each validation phase uses them. Includes bundle composition, namespace table, and how to extend schemas. |
 | [**regvalidate-parity-notes.md**](regvalidate-parity-notes.md) | **Edge cases and intentional quirks** when matching the legacy deployment: phase 3 iterator limits, sync vs background `maxVORInclude`, pseudo-JSON quoting, HTTP 500 paths, OAI Explorer dependence, and result XML without a published wrapper XSD. |
