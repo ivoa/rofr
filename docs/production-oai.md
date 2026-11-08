@@ -4,6 +4,8 @@ Deployers run Benson behind TLS terminators or load balancers. Harvesters learn 
 
 If the app only sees `http://127.0.0.1:8000`, OAI responses will advertise that address and harvesters will fail or target the wrong host.
 
+This satisfies OAI **`Identify`** **`baseURL`** and RI **`accessURL`** conventions when the proxy is configured correctly. The settings below are **`LOCAL`** (Benson deployment only—not defined in IVOA specs). See [compliance.md § LOCAL elements](compliance.md#local-and-non-ivoa-elements-operator-reference) for a full operator list including registration and searchables env vars.
+
 ## Settings
 
 | Name | Default | Purpose |
@@ -74,5 +76,7 @@ Spoofed `X-Forwarded-*` from arbitrary clients is why production should set `FOR
 
 ## Related
 
+- [compliance.md](compliance.md) — IVOA vs LOCAL behaviour, test map, known gaps
 - Environment variable table: [project README § Environment](../README.md#environment)
 - OAI sets and harvest examples: [docs/README § OAI endpoints](README.md#oai-endpoints)
+- Spec ambiguities (`ivo_publishers`, validator API, etc.): [reference.md § Known ambiguities](../.cursor/skills/ivoa-registry-of-registries/reference.md#known-ambiguities-flag-do-not-silently-resolve)

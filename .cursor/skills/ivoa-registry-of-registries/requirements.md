@@ -8,6 +8,8 @@ Working checklist for implementing or verifying Benson as an IVOA RofR. Mark ite
 
 Narrative background: [reference.md](reference.md)
 
+**Benson deployment status (§1–§8 summary, LOCAL elements, test map):** [docs/compliance.md](../../docs/compliance.md). Update that file when shipping behaviour changes; use this checklist for line-by-line PR review.
+
 ---
 
 ## 1. Service role and scope

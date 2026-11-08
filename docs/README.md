@@ -95,6 +95,8 @@ These are **catalog sources**, not the URLs submitted to the harvest validator. 
 
 **Production deploy:** reverse proxies, `BENSON_PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, and post-deploy checks — [production-oai.md](production-oai.md).
 
+**Compliance:** IVOA vs **LOCAL** behaviour, endpoint evidence, and open gaps — [compliance.md](compliance.md). Full checklist: [requirements.md](../.cursor/skills/ivoa-registry-of-registries/requirements.md).
+
 ### HTTP surface — Benson (current)
 
 | Method | Path | Description |
@@ -127,6 +129,7 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 | Document | What it explains |
 |----------|------------------|
 | [**production-oai.md**](production-oai.md) | **Deployers** — public `baseURL`, proxy headers, verification behind TLS/load balancers. |
+| [**compliance.md**](compliance.md) | **Compliance** — requirements §1–§8 status, LOCAL/non-IVOA elements, test links. |
 | [**implementation-todo.md**](implementation-todo.md) | **Backlog** — PR-sized follow-ups (compliance, parity). |
 | [**publisher-oai-metadata.md**](publisher-oai-metadata.md) | **Publisher OAI listings** — RofR Note §2, `identify_resource_xml` in `publishers.json`, stub fallback. |
 | [**regvalidate-functional-contract.md**](regvalidate-functional-contract.md) | **Normative behaviour** for a rewrite: HTTP surface, session/`runid` model, `op` catalogue, three validation phases, `builtinSchemas`, namespace-to-XSD map, XSLT roles, live response shapes, and related IVOA standards links. Start here when implementing or comparing behaviour. |

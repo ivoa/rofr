@@ -16,17 +16,13 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **Withdrawn standards (`ivo_managed`)** | `status="deleted"` on standard XML and/or [`withdrawn_standards.json`](../assets/standards/withdrawn_standards.json); [assets/standards/README.md](../assets/standards/README.md); [ADR 0008](adr/0008-standards-oai-tombstones.md) |
 | **Searchables / publishers UI** | Home page lists (RegTAP/cache + `publishers.json`) |
 | **Production OAI / proxy** | [production-oai.md](production-oai.md) |
+| **Compliance audit (PR-H)** | [compliance.md](compliance.md) (+ links from production-oai, README Deployers) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ---
 
 ## Open items (one PR each)
-
-### PR-H — Requirements compliance audit
-
-- Walk [requirements.md](../.cursor/skills/ivoa-registry-of-registries/requirements.md) §1–§8; check off implemented items with test/doc links.
-- File issues for any intentional non-compliance.
 
 ### PR-I — Validator / parity (scoped)
 

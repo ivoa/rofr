@@ -125,6 +125,10 @@ curl -sS 'https://YOUR_PUBLIC_HOST/oai?verb=Identify' \
 
 The printed URL must be exactly what harvesters will use (typically `https://YOUR_PUBLIC_HOST/oai`).
 
+### Compliance and LOCAL behaviour
+
+IVOA **`MUST`/`SHOULD`** items vs Benson-only (**`LOCAL`**) settings (proxy env, registration policy, RegTAP searchables, JSON APIs), with pytest pointers and documented gaps: **[docs/compliance.md](docs/compliance.md)**. Spec ambiguities: [IVOA skill reference § Known ambiguities](.cursor/skills/ivoa-registry-of-registries/reference.md#known-ambiguities-flag-do-not-silently-resolve).
+
 ### Publisher liveness
 
 Deployers who operate a live Registry of Registries instance should run the publisher liveness check periodically:
