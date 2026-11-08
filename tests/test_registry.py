@@ -20,6 +20,8 @@ from benson.app import create_app, fastapi_app  # noqa: E402
 from benson.config import Settings  # noqa: E402
 from benson.oai.xmlutil import extract_error_codes  # noqa: E402
 from benson.registry.oai_emit import publishers_to_list_records_xml
+from benson.registry.publisher_oai import publisher_metadata_element
+from benson.oai.phase2 import extract_identify_registry_resource_xml
 from benson.registry.publishers_store import PublisherStore
 from benson.registry.registration import eligibility_payload
 from benson.registry.registration_policy import eligible_for_registration
@@ -287,6 +289,55 @@ async def test_eligibility_payload_all_passed_and_eligible() -> None:
     assert payload["mode"] == "create"
     assert payload["suggested_oai_identifier"] == "ivo://registry.example/reg"
     assert payload["suggested_title"] == "Example Registry"
+
+
+@pytest.mark.asyncio
+async def test_register_persists_identify_resource_xml(
+    client: AsyncClient,
+) -> None:
+    pub = Path(os.environ["PUBLISHERS_REGISTRY_FILE"])
+    ps = PublisherStore(pub)
+    await ps.ensure_seed()
+    fixture = (_repo / "tests" / "fixtures" / "cadc_identify.xml").read_bytes()
+    root = etree.fromstring(fixture, etree.XMLParser(no_network=True, resolve_entities=False))
+    identify_xml = extract_identify_registry_resource_xml(root)
+    assert identify_xml is not None
+
+    run = HarvestRun(
+        run_id="regtest-identify-xml",
+        endpoint="https://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/reg/oai",
+        builtin_schemas=True,
+        cache=True,
+        show_status="fail warn rec",
+        fmt="html",
+        error_fmt="html",
+        identify_resource_xml=identify_xml,
+        identify_oai_identifier="ivo://cadc.nrc.ca/registry",
+        identify_title="CADC Registry",
+    )
+    merged = R.registry_validation_root(status="completed", nfail="0", nwarn="0", nrec="0")
+    run.merged_validation = etree.ElementTree(merged)
+    await store.create(run)
+
+    reg = await client.post(
+        "/validator/jobs/regtest-identify-xml/register",
+        data={"oai_identifier": "ivo://cadc.nrc.ca/registry", "title": "CADC Registry"},
+    )
+    assert reg.status_code == 201
+    rows = await ps.load()
+    row = next(r for r in rows if r.oai_identifier == "ivo://cadc.nrc.ca/registry")
+    assert row.identify_resource_xml
+    assert "cadc.nrc.ca" in row.identify_resource_xml
+
+    md = publisher_metadata_element(row)
+    assert "managedAuthority" in etree.tostring(md, encoding="unicode")
+
+    r = await client.get(
+        "/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers"
+    )
+    assert r.status_code == 200
+    assert "cadc.nrc.ca" in r.text
+    assert "<managedAuthority" in r.text or "managedAuthority" in r.text
 
 
 @pytest.mark.asyncio

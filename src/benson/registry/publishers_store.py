@@ -50,6 +50,7 @@ class StoredPublisher:
     live_oai_identifier: str | None = None
     live_title: str | None = None
     check_detail: str | None = None
+    identify_resource_xml: str | None = None
 
     def to_registry(self) -> PublisherRegistry:
         return PublisherRegistry(
@@ -64,6 +65,7 @@ class StoredPublisher:
             live_oai_identifier=self.live_oai_identifier,
             live_title=self.live_title,
             check_detail=self.check_detail,
+            identify_resource_xml=self.identify_resource_xml,
         )
 
     @classmethod
@@ -82,6 +84,7 @@ class StoredPublisher:
             live_oai_identifier=rec.live_oai_identifier,
             live_title=rec.live_title,
             check_detail=rec.check_detail,
+            identify_resource_xml=rec.identify_resource_xml,
         )
 
 
@@ -141,6 +144,7 @@ class PublisherStore:
                     live_oai_identifier=row.get("live_oai_identifier"),
                     live_title=row.get("live_title"),
                     check_detail=row.get("check_detail"),
+                    identify_resource_xml=row.get("identify_resource_xml"),
                 )
             )
         return out
@@ -181,6 +185,10 @@ class PublisherStore:
                     for key in _CHECK_FIELD_KEYS:
                         if row.get(key) is not None and new_row.get(key) is None:
                             new_row[key] = row[key]
+                    if not (new_row.get("identify_resource_xml") or "").strip() and row.get(
+                        "identify_resource_xml"
+                    ):
+                        new_row["identify_resource_xml"] = row["identify_resource_xml"]
                     rows[i] = new_row
                     replaced = True
                     break

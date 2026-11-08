@@ -12,18 +12,13 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **`ivo_managed` / `ivo_publishers`** | Sets on `/oai`; publishers from `publishers.json` |
 | **`GET /list-publishers`** | Full OAI envelope; same rows as `ListRecords&set=ivo_publishers` |
 | **Harvest validator** | Phases 1–3, registration, publishers JSON API (see [functional contract](regvalidate-functional-contract.md)) |
+| **Publisher Identify XML** | `identify_resource_xml` in `publishers.json` ([publisher-oai-metadata.md](publisher-oai-metadata.md)) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ---
 
 ## Open items (one PR each)
-
-### PR-B — Persist Identify metadata at registration
-
-- On successful registration, store the validated Identify `description` `vg:Registry` XML (or full response slice) in `publishers.json`.
-- Serve that payload in `ivo_publishers` OAI records instead of the minimal synthesized resource in `publisher_oai.py`.
-- Migration: existing rows keep working with synthesis until re-registered or backfilled.
 
 ### PR-C — Withdrawn publisher tombstones
 

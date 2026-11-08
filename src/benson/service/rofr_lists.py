@@ -35,6 +35,7 @@ class PublisherRegistry:
     live_oai_identifier: str | None = None
     live_title: str | None = None
     check_detail: str | None = None
+    identify_resource_xml: str | None = None
 
 
 LIST_PUBLISHERS_PATH = "/list-publishers"

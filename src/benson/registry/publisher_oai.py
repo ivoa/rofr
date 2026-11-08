@@ -17,7 +17,25 @@ IVO_PUBLISHERS = "ivo_publishers"
 _XML_PARSER = etree.XMLParser(no_network=True, resolve_entities=False)
 
 
+def _parsed_identify_resource(rec: PublisherRegistry) -> etree._Element | None:
+    raw = (rec.identify_resource_xml or "").strip()
+    if not raw:
+        return None
+    try:
+        return etree.fromstring(
+            raw.encode("utf-8"),
+            parser=_XML_PARSER,
+        )
+    except etree.XMLSyntaxError:
+        return None
+
+
 def publisher_datestamp(rec: PublisherRegistry) -> str:
+    resource = _parsed_identify_resource(rec)
+    if resource is not None:
+        updated = resource.get("updated")
+        if updated and str(updated).strip():
+            return normalize_datestamp(str(updated).strip())
     raw = rec.updated_at or rec.registered_at
     return normalize_datestamp(raw)
 
@@ -66,12 +84,34 @@ def build_publisher_metadata(rec: PublisherRegistry) -> etree._Element:
     )
 
 
+def publisher_metadata_element(rec: PublisherRegistry) -> etree._Element:
+    """OAI ``ivo_publishers`` metadata: stored Identify ``vg:Registry`` or a minimal stub."""
+    resource = _parsed_identify_resource(rec)
+    if resource is not None:
+        return etree.fromstring(
+            etree.tostring(resource, encoding="UTF-8"),
+            parser=_XML_PARSER,
+        )
+    return build_publisher_metadata(rec)
+
+
+def _resource_identifier(metadata: etree._Element) -> str | None:
+    for el in metadata.iter():
+        if not isinstance(el.tag, str):
+            continue
+        if el.tag.rsplit("}", 1)[-1] == "identifier" and el.text and el.text.strip():
+            return el.text.strip()
+    return None
+
+
 def publisher_standard_record(rec: PublisherRegistry) -> StandardRecord:
+    metadata = publisher_metadata_element(rec)
+    ident = _resource_identifier(metadata) or rec.oai_identifier.strip()
     return StandardRecord(
-        identifier=rec.oai_identifier,
+        identifier=ident,
         datestamp=publisher_datestamp(rec),
         resource_status="active",
-        metadata=build_publisher_metadata(rec),
+        metadata=metadata,
         oai_set=IVO_PUBLISHERS,
     )
 

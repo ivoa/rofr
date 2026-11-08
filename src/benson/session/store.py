@@ -34,6 +34,7 @@ class HarvestRun:
     canceled: bool = False
     identify_oai_identifier: str | None = None
     identify_title: str | None = None
+    identify_resource_xml: str | None = None
 
     def add_status_row(self, **kw: str) -> None:
         self.status_rows.append({k: str(v) for k, v in kw.items()})

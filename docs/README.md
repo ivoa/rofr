@@ -124,6 +124,7 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 | Document | What it explains |
 |----------|------------------|
 | [**implementation-todo.md**](implementation-todo.md) | **Backlog** — PR-sized follow-ups (OAI, publishers, searchables, parity, compliance). |
+| [**publisher-oai-metadata.md**](publisher-oai-metadata.md) | **Publisher OAI listings** — RofR Note §2, `identify_resource_xml` in `publishers.json`, stub fallback. |
 | [**regvalidate-functional-contract.md**](regvalidate-functional-contract.md) | **Normative behaviour** for a rewrite: HTTP surface, session/`runid` model, `op` catalogue, three validation phases, `builtinSchemas`, namespace-to-XSD map, XSLT roles, live response shapes, and related IVOA standards links. Start here when implementing or comparing behaviour. |
 | [**schemas-and-validation-assets.md**](schemas-and-validation-assets.md) | **Developer guide** to bundled XSDs ([`assets/schemas/`](../assets/schemas/)), XSLT rules ([`assets/validate/`](../assets/validate/)), standards records ([`assets/standards/`](../assets/standards/)), and how each validation phase uses them. Includes bundle composition, namespace table, and how to extend schemas. |
 | [**regvalidate-parity-notes.md**](regvalidate-parity-notes.md) | **Edge cases and intentional quirks** when matching the legacy deployment: phase 3 iterator limits, sync vs background `maxVORInclude`, pseudo-JSON quoting, HTTP 500 paths, OAI Explorer dependence, and result XML without a published wrapper XSD. |

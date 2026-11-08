@@ -204,7 +204,7 @@ SEARCHABLES_CACHE_DIR=./data/searchables benson sync-searchables
 
 ### Registering and updating publishing registries
 
-After a successful validation (zero failures, built-in XSD schemas enabled), the validator offers registration with the Registry of Registries. Submit the registry’s IVOA identifier and title; Benson stores the entry in `publishers.json` and serves it at `/list-publishers`.
+After a successful validation (zero failures, built-in XSD schemas enabled), the validator offers registration with the Registry of Registries. Submit the registry’s IVOA identifier and title; Benson stores the entry in `publishers.json` (including Identify `vg:Registry` XML when available; see [docs/publisher-oai-metadata.md](docs/publisher-oai-metadata.md)) and serves it at `/list-publishers` and `/oai?set=ivo_publishers`.
 
 **Updates** use the same flow: validate the registry’s current OAI endpoint (for example after a host or domain change), then submit the same IVOA identifier and an updated title if needed. Benson detects the existing listing and updates `harvest_access_url` and `title` instead of rejecting the submission. The original `registered_at` timestamp is preserved; `updated_at` records when the listing last changed.
 

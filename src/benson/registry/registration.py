@@ -28,6 +28,20 @@ def _harvest_url(run: HarvestRun) -> str:
     return run.endpoint.strip().rstrip("/") or run.endpoint.strip()
 
 
+def _identify_resource_xml(
+    run: HarvestRun,
+    existing: PublisherRegistry | None = None,
+) -> str | None:
+    fresh = (run.identify_resource_xml or "").strip()
+    if fresh:
+        return fresh
+    if existing is not None:
+        kept = (existing.identify_resource_xml or "").strip()
+        if kept:
+            return kept
+    return None
+
+
 def _live_check_fields(
     run: HarvestRun,
     oid: str,
@@ -130,6 +144,7 @@ async def _register_new(
         live_oai_identifier=live_oai_identifier,
         live_title=live_title,
         check_detail=check_detail,
+        identify_resource_xml=_identify_resource_xml(run),
     )
     stored = await pub_store.upsert(record)
     return RegistrationResult(record=stored, created=True)
@@ -166,6 +181,7 @@ async def _update_existing(
         live_oai_identifier=live_oai_identifier,
         live_title=live_title,
         check_detail=check_detail,
+        identify_resource_xml=_identify_resource_xml(run, existing),
     )
     stored = await pub_store.upsert(record)
     return RegistrationResult(record=stored, created=False)

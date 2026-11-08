@@ -83,6 +83,22 @@ def extract_identify_state(parsed: etree._Element) -> dict[str, str]:  # noqa: S
     }
 
 
+def extract_identify_registry_resource_xml(parsed: etree._Element) -> str | None:  # noqa: SLF001
+    """Serialize the first ``vg:Registry`` ``ri:Resource`` from an Identify ``description``."""
+    regs = parsed.xpath(
+        ".//oai:Identify/oai:description/ri:Resource[contains(@xsi:type, ':Registry')]",
+        namespaces=_XPATH_NS,
+    )
+    if not regs:
+        return None
+    reg = regs[0]
+    clone = etree.fromstring(
+        etree.tostring(reg, encoding="UTF-8"),
+        etree.XMLParser(no_network=True, resolve_entities=False),
+    )
+    return etree.tostring(clone, encoding="unicode")
+
+
 def identify_registration_defaults(parsed: etree._Element) -> dict[str, str]:  # noqa: SLF001
     """Return suggested registration form values from an Identify response."""
     state = extract_identify_state(parsed)
@@ -137,6 +153,9 @@ async def build_ivoa_harvest_validation(
         if role == "Identify":
             identify_state = extract_identify_state(parsed)
             registration_defaults = identify_registration_defaults(parsed)
+            resource_xml = extract_identify_registry_resource_xml(parsed)
+            if resource_xml:
+                registration_defaults["identify_resource_xml"] = resource_xml
 
         if violations:
             tq.append(

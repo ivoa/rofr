@@ -64,6 +64,7 @@ async def execute_harvest_validation(
     )
     run.identify_oai_identifier = identify_defaults.get("oai_identifier")
     run.identify_title = identify_defaults.get("title")
+    run.identify_resource_xml = identify_defaults.get("identify_resource_xml")
     ivoa_tree = etree.ElementTree(ivoa_root)
     run.ivoa_validation = ivoa_tree
 

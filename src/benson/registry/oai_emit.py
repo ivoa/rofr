@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from lxml import etree
 
-from benson.registry.publisher_oai import build_publisher_metadata
+from benson.registry.publisher_oai import publisher_metadata_element
 from benson.service.rofr_lists import PublisherRegistry
 
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
@@ -23,7 +23,7 @@ def publishers_to_list_records_xml(records: list[PublisherRegistry]) -> bytes:
         ident = etree.SubElement(header, f"{{{OAI_NS}}}identifier")
         ident.text = rec.oai_identifier
         metadata = etree.SubElement(oai_rec, f"{{{OAI_NS}}}metadata")
-        metadata.append(build_publisher_metadata(rec))
+        metadata.append(publisher_metadata_element(rec))
     return etree.tostring(
         root,
         encoding="UTF-8",
