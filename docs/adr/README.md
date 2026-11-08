@@ -20,10 +20,11 @@ ADRs use a short [Michael Nygard–style](https://cognitect.com/blog/2011/11/15/
 | [0005](0005-parity-driven-behaviour-contract.md) | Parity-driven behaviour contract | Accepted |
 | [0006](0006-reuse-legacy-validation-assets.md) | Reuse legacy XSD/XSLT assets unchanged | Accepted |
 | [0007](0007-in-memory-harvest-run-store.md) | In-memory harvest run and session state | Accepted |
+| [0008](0008-standards-oai-tombstones.md) | OAI tombstones for withdrawn `ivo_managed` standards | Accepted |
 
 ## Adding a new ADR
 
-1. Copy the next number (`0008-…`).
+1. Copy the next number (`0009-…`).
 2. Set **Status** to `Proposed` until reviewed, then `Accepted`.
 3. Link the ADR from this index.
 4. If an ADR is replaced, mark the old one **Superseded by** the new number.

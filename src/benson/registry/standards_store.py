@@ -10,6 +10,11 @@ from lxml import etree
 from benson.config import Settings
 from benson.oai.dates import normalize_datestamp
 from benson.registry.registry_self import authority_record, ivoa_authority_record, registry_record
+from benson.registry.standards_withdrawn import (
+    manifest_tombstones_for_disk,
+    tombstone_metadata,
+    withdrawn_manifest_path,
+)
 
 @dataclass(frozen=True)
 class StandardRecord:
@@ -23,6 +28,9 @@ class StandardRecord:
 def _dir_mtime(path: Path) -> float:
     try:
         mtimes = [path.stat().st_mtime]
+        manifest = withdrawn_manifest_path(path)
+        if manifest.is_file():
+            mtimes.append(manifest.stat().st_mtime)
         for child in path.glob("*.xml"):
             mtimes.append(child.stat().st_mtime)
         return max(mtimes)
@@ -82,6 +90,18 @@ class StandardsStore:
         if self._standards_dir.is_dir():
             for path in sorted(self._standards_dir.glob("*.xml")):
                 records.append(_parse_standard_file(path))
+            on_disk = {rec.identifier for rec in records}
+            for entry in manifest_tombstones_for_disk(
+                self._standards_dir, on_disk_identifiers=on_disk
+            ):
+                records.append(
+                    StandardRecord(
+                        identifier=entry.identifier,
+                        datestamp=entry.withdrawn_at,
+                        resource_status="deleted",
+                        metadata=tombstone_metadata(entry.identifier),
+                    )
+                )
         self._records = records
         self._cache_mtime = mtime
 

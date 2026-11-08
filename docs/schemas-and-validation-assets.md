@@ -165,6 +165,8 @@ This directory holds **VOResource XML documents** describing IVOA standards (`xs
 
 Each `*.xml` file is one standard record (identifier, title, datestamp, metadata). Example: `voresource.xml` describes the VOResource standard itself.
 
+Withdrawn standards are exposed as OAI tombstones (`header status="deleted"`, no metadata): set `status="deleted"` on the XML file and bump `updated`, or remove the file and list the identifier in `withdrawn_standards.json`. Operator steps: [`assets/standards/README.md`](../assets/standards/README.md).
+
 ---
 
 ## `assets/authority/` — naming authority records

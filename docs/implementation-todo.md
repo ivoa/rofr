@@ -14,17 +14,13 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **Harvest validator** | Phases 1–3, registration, publishers JSON API (see [functional contract](regvalidate-functional-contract.md)) |
 | **Publisher Identify XML** | `identify_resource_xml` in `publishers.json` ([publisher-oai-metadata.md](publisher-oai-metadata.md)) |
 | **Publisher withdraw** | CLI `withdraw-publisher` / `reactivate-publisher`; OAI tombstones; [publisher-oai-metadata.md](publisher-oai-metadata.md) |
+| **Withdrawn standards (`ivo_managed`)** | `status="deleted"` on standard XML and/or [`withdrawn_standards.json`](../assets/standards/withdrawn_standards.json); [assets/standards/README.md](../assets/standards/README.md); [ADR 0008](adr/0008-standards-oai-tombstones.md) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ---
 
 ## Open items (one PR each)
-
-### PR-D — Deleted or removed standards in `ivo_managed`
-
-- When a standard XML file is removed or marked inactive, expose a tombstone in List/Get responses (persistent deletion policy already declared in Identify).
-- Optional: watcher or explicit manifest for withdrawn standards.
 
 ### PR-E — `/list-publishers` parity sample
 
