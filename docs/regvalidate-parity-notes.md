@@ -2,7 +2,17 @@
 
 Use with [regvalidate-functional-contract.md](regvalidate-functional-contract.md) (behaviour) and [samples/](samples/) (response shapes).
 
-**Discovery model:** Lack of standalone documentation elsewhere means **`http://rofr.ivoa.net`** plus **this repository** are the practical truth for corner cases—session handling, OAI Explorer quirks, validator result XML shape, lax JSON encoding, HTTP error pages. Automated parity checks (fixture diff, contract tests hitting production or a faithfully deployed Legacy WAR, and behavioural tests anchored to Java/XSLT where needed) guard against undocumented drift during a rewrite.
+## Why parity
+
+**Parity** here means Benson’s harvest validator and legacy-compatible HTTP API **behave like `http://rofr.ivoa.net` and the Java WAR**—not a separate goal of matching every IVOA document in isolation. The purpose is an **easier transition**: operators, registry providers, and existing scripts can switch to Benson without surprise changes to URLs, session/`op` flows, result XML, status encoding, and phase limits.
+
+- **During rollout:** parity reduces retraining and broken integrations; treat unexpected differences versus production or [samples/](samples/) as bugs unless [compliance.md](compliance.md) or this file records an intentional change.
+- **After Benson is the reference deployment:** parity matters most where legacy behaviour was still correct for users; IVOA normative OAI and registration policy are tracked in [compliance.md](compliance.md), not in this file.
+- **Closing gaps:** fix or document one area at a time (see sections below). No standing “parity umbrella” backlog item—pick a section, ship a small PR, update fixtures or notes.
+
+## Discovery model
+
+Lack of standalone documentation elsewhere means **`http://rofr.ivoa.net`** plus **this repository** are the practical truth for corner cases—session handling, OAI Explorer quirks, validator result XML shape, lax JSON encoding, HTTP error pages. Automated parity checks (fixture diff, contract tests hitting production or a faithfully deployed Legacy WAR, and behavioural tests anchored to Java/XSLT where needed) guard against undocumented drift during a rewrite.
 
 ## OAI phase 3 (harvest iterators)
 

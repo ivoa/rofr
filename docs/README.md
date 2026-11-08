@@ -63,7 +63,7 @@ Full asset layout, namespace map, and developer extension notes: [schemas-and-va
 
 ### Discovery and parity
 
-External documentation for this service has been sparse. Treat **`http://rofr.ivoa.net`**, **this codebase**, and **[`docs/samples/`](samples/)** captures as a composite reference. Prefer **parity tests** (against production or a faithfully deployed legacy WAR, plus the checked-in sample bodies) wherever prose is ambiguous; document any intentional divergence in [regvalidate-parity-notes.md](regvalidate-parity-notes.md).
+External documentation for this service has been sparse. Treat **`http://rofr.ivoa.net`**, **this codebase**, and **[`docs/samples/`](samples/)** captures as a composite reference. Prefer **parity tests** (against production or a faithfully deployed legacy WAR, plus the checked-in sample bodies) wherever prose is ambiguous; document any intentional divergence in [regvalidate-parity-notes.md](regvalidate-parity-notes.md). **Parity** targets an **easier transition** from the legacy validator for operators and integrations—see [regvalidate-parity-notes.md § Why parity](regvalidate-parity-notes.md#why-parity).
 
 ---
 

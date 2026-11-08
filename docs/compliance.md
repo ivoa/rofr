@@ -62,6 +62,8 @@ Benson **publishes** the publisher list; it does **not** implement the Note §3 
 
 **Phase 1** may depend on external OAI Repository Explorer / `comply` when configured — deployment-specific.
 
+**Validator parity (transition):** Matching legacy `regvalidate` behaviour is for **easier migration** from `rofr.ivoa.net`, not a substitute for IVOA MUSTs on `/oai`. Purpose and remaining quirks: [regvalidate-parity-notes.md § Why parity](regvalidate-parity-notes.md#why-parity).
+
 ---
 
 ## 5. Operational endpoints (LOCAL surface)

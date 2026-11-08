@@ -17,6 +17,7 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **Searchables / publishers UI** | Home page lists (RegTAP/cache + `publishers.json`) |
 | **Production OAI / proxy** | [production-oai.md](production-oai.md) |
 | **Compliance audit (PR-H)** | [compliance.md](compliance.md) (+ links from production-oai, README Deployers) |
+| **Validator parity policy (PR-I)** | [regvalidate-parity-notes.md § Why parity](regvalidate-parity-notes.md#why-parity) — transition goal; per-gap work tracked in that file, not here |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
@@ -24,9 +25,7 @@ Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ## Open items (one PR each)
 
-### PR-I — Validator / parity (scoped)
-
-Pick **one** gap per PR from [regvalidate-parity-notes.md](regvalidate-parity-notes.md) (e.g. phase 1 explorer wiring, phase 3 limits, JSON compat). Not OAI-publisher work; keep PRs narrow.
+_None at present._ Validator parity **gaps** (phase 1 Explorer, phase 3 caps, pseudo-JSON, etc.) remain described in [regvalidate-parity-notes.md](regvalidate-parity-notes.md); address with small PRs when needed.
 
 ---
 
