@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
 
 
-@dataclass(slots=True)
+@dataclass
 class SearchableRegistry:
     title: str
     href: str | None
     fields: dict[str, str]
 
 
-@dataclass(slots=True)
+@dataclass
 class PublisherRegistry:
     oai_identifier: str
     title: str

@@ -38,10 +38,8 @@ benson --reload
 |--------|------|-------------|
 | GET, POST | `/validator`, `/regvalidate` | Async harvest validation form |
 | POST | `/validator/jobs` | Start validation job |
-| GET | `/oai` | IVOA standards OAI-PMH catalog from `assets/standards` |
-| GET | `/list-publishers` | Publishers OAI XML catalog |
-
-For OAI-PMH gaps (`ivo_publishers`, POST, publisher record quality, tests), see [docs/oai-pmh-todo.md](docs/oai-pmh-todo.md).
+| GET, POST | `/oai` | RofR OAI-PMH: `ivo_managed` (standards + authorities), `ivo_publishers` (registered registries) |
+| GET | `/list-publishers` | Legacy publisher list (`ListRecords` + `ivo_publishers` envelope) |
 | GET | `/api/v1/registry/publishers` | Publishers registry (JSON) |
 | GET, POST | `/api/v1/registry-validate/harvest` | Harvest validation API |
 | POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation (see below) |
@@ -150,6 +148,8 @@ After installing with `.[dev]` (see **Run** above):
 ```bash
 pytest
 ```
+
+**Python versions:** Install metadata declares **3.9+** ([`pyproject.toml`](pyproject.toml)). GitHub Actions and the [Dockerfile](Dockerfile) run the full suite on **3.14**. **3.9** is supported for local macOS installs but pulls `eval_type_backport` automatically; **3.14** is the primary CI/production target.
 
 On Debian/Ubuntu, install system libraries for `lxml` if needed: `apt-get install libxml2 libxslt1.1`.
 

@@ -114,6 +114,43 @@ async def test_list_publishers_route(client: AsyncClient, tmp_path: Path, monkey
     assert r.status_code == 200
     assert "ivo://route/reg" in r.text
     assert "route.example" in r.text
+    assert "responseDate" in r.text
+    assert "ivo_publishers" in r.text
+
+
+@pytest.mark.asyncio
+async def test_oai_ivo_publishers_list_records(
+    client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pub = tmp_path / "publishers.json"
+    monkeypatch.setenv("PUBLISHERS_REGISTRY_FILE", str(pub))
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://harvest/reg",
+            title="Harvest Reg",
+            harvest_access_url="https://harvest.example/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+    r = await client.get(
+        "/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers"
+    )
+    assert r.status_code == 200
+    root = etree.fromstring(r.content, etree.XMLParser(no_network=True, resolve_entities=False))
+    OAI_NS = "http://www.openarchives.org/OAI/2.0/"
+    idents = [
+        el.text.strip()
+        for el in root.findall(f".//{{{OAI_NS}}}header/{{{OAI_NS}}}identifier")
+        if el.text
+    ]
+    assert idents == ["ivo://harvest/reg"]
+    assert "ivo://ivoa.net/rofr" not in idents
+    first_header = root.find(f".//{{{OAI_NS}}}record/{{{OAI_NS}}}header")
+    assert first_header is not None
+    set_specs = [el.text for el in first_header.findall(f"{{{OAI_NS}}}setSpec") if el.text]
+    assert "ivo_publishers" in set_specs
+    assert first_header.find(f"{{{OAI_NS}}}datestamp") is not None
 
 
 @pytest.mark.asyncio

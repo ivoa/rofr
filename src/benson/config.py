@@ -19,7 +19,7 @@ def project_root() -> Path:
     return here.parents[2]
 
 
-@dataclass(slots=True)
+@dataclass
 class Settings:
     schema_root: Path
     assets_root: Path

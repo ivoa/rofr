@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _SECONDS = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -25,7 +25,7 @@ def normalize_datestamp(raw: str | None) -> str:
         if base.endswith("Z"):
             base = base[:-1]
         try:
-            dt = datetime.fromisoformat(base).replace(tzinfo=UTC)
+            dt = datetime.fromisoformat(base).replace(tzinfo=timezone.utc)
             return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
         except ValueError:
             pass
@@ -33,16 +33,16 @@ def normalize_datestamp(raw: str | None) -> str:
         try:
             dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=UTC)
+                dt = dt.replace(tzinfo=timezone.utc)
             else:
-                dt = dt.astimezone(UTC)
+                dt = dt.astimezone(timezone.utc)
             return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
         except ValueError:
             pass
     return f"{text}T00:00:00Z" if _DAY.match(text[:10]) else "2000-01-01T00:00:00Z"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ParsedOaiDate:
     raw: str
     granularity: str  # "day" or "seconds"
@@ -55,10 +55,10 @@ def parse_oai_date(value: str) -> ParsedOaiDate | None:
     if _YEAR.match(text):
         return None
     if _DAY.match(text):
-        dt = datetime.strptime(text, "%Y-%m-%d").replace(tzinfo=UTC)
+        dt = datetime.strptime(text, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         return ParsedOaiDate(raw=text, granularity="day", instant=dt)
     if _SECONDS.match(text):
-        dt = datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+        dt = datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         return ParsedOaiDate(raw=text, granularity="seconds", instant=dt)
     return None
 
@@ -97,7 +97,7 @@ def validate_from_until(
 
 def record_in_range(datestamp: str, from_raw: str | None, until_raw: str | None) -> bool:
     """Return whether ``datestamp`` falls within optional ``from``/``until`` bounds."""
-    rec = datetime.strptime(normalize_datestamp(datestamp), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    rec = datetime.strptime(normalize_datestamp(datestamp), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     if from_raw is not None:
         fp = parse_oai_date(from_raw)
         if fp is None:

@@ -19,7 +19,7 @@ OAI_NS = "http://www.openarchives.org/OAI/2.0/"
 HARVEST_QUERY = "ListRecords harvest"
 
 
-@dataclass(slots=True)
+@dataclass
 class HarvestStats:
     nfail: int = 0
     nwarn: int = 0

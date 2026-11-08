@@ -11,12 +11,13 @@ from benson.config import Settings
 from benson.oai.dates import normalize_datestamp
 from benson.registry.registry_self import authority_record, ivoa_authority_record, registry_record
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class StandardRecord:
     identifier: str
     datestamp: str
     resource_status: str
     metadata: etree._Element  # noqa: SLF001 — deep-copied ri:Resource root
+    oai_set: str = "ivo_managed"
 
 
 def _dir_mtime(path: Path) -> float:

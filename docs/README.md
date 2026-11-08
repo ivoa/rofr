@@ -90,7 +90,7 @@ Benson also **publishes** registry metadata over OAI-PMH for the Registry of Reg
 
 These are **catalog sources**, not the URLs submitted to the harvest validator. Environment variables `STANDARDS_DIR`, `OAI_REPOSITORY_NAME`, `OAI_REGISTRY_IDENTIFIER`, and related settings control how `/oai` identifies itself; see the [project README](../README.md).
 
-**OAI implementation status:** `/oai` implements the six OAI verbs for `ivo_managed` (standards catalog). Publisher discovery via `set=ivo_publishers` on the same base URL is still outstanding — see [oai-pmh-todo.md](oai-pmh-todo.md).
+**OAI implementation status:** `GET`/`POST` `/oai` implements the six OAI verbs. Set **`ivo_managed`** serves infrastructure and IVOA standards; set **`ivo_publishers`** serves registered publishing registries. Legacy **`GET /list-publishers`** returns the same publisher list with a full OAI-PMH envelope (canonical harvest: `/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers`). Remaining optional items: [oai-pmh-todo.md](oai-pmh-todo.md).
 
 ### HTTP surface — Benson (current)
 
