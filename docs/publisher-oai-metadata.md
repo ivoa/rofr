@@ -90,9 +90,36 @@ Enough for harvest discovery (identifier + standard OAI `accessURL`). No curatio
 | Aligns with Note §2 | Approximate | Yes |
 | `metadataPrefix=oai_dc` | Title + identifier mainly | Richer Dublin Core from full resource |
 
+## Withdrawn listings (OAI tombstones)
+
+Operators delist a publisher with `benson withdraw-publisher` (see root [README](../README.md)). The JSON row remains in `publishers.json` with:
+
+| Field | Role |
+|-------|------|
+| `listing_status` | `withdrawn` |
+| `withdrawn_at` | OAI **datestamp** for the tombstone |
+| `withdraw_reason` | Optional audit note (not served in OAI) |
+
+Harvester-facing `/oai` and `/list-publishers` still return the OAI identifier in `set=ivo_publishers`, but the record header carries `status="deleted"` and there is **no** `metadata` element (OAI persistent deletion). Human-facing listings and `GET /api/v1/registry/publishers` omit withdrawn rows.
+
+Example tombstone shape (envelope omitted):
+
+```xml
+<oai:record>
+  <oai:header status="deleted">
+    <oai:identifier>ivo://authority/registry</oai:identifier>
+    <oai:datestamp>2026-06-01T12:00:00Z</oai:datestamp>
+    <oai:setSpec>ivo_publishers</oai:setSpec>
+  </oai:header>
+</oai:record>
+```
+
+Re-registration after validation clears withdrawal and restores full metadata emission.
+
 ## Code
 
 - Extract: `extract_identify_registry_resource_xml()` in `src/benson/oai/phase2.py`
 - Session: `HarvestRun.identify_resource_xml`
 - Persist: `src/benson/registry/registration.py`, `publishers_store.py`
+- Withdraw / reactivate: `publisher_lifecycle.py`, `benson withdraw-publisher` / `reactivate-publisher`
 - OAI emit: `publisher_metadata_element()` in `src/benson/registry/publisher_oai.py`

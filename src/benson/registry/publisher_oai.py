@@ -7,7 +7,7 @@ from lxml import etree
 from benson.oai.dates import normalize_datestamp
 from benson.registry.registry_self import REGISTRY_STD
 from benson.registry.standards_store import StandardRecord
-from benson.service.rofr_lists import PublisherRegistry
+from benson.service.rofr_lists import PublisherRegistry, publisher_is_withdrawn
 
 RI_NS = "http://www.ivoa.net/xml/RegistryInterface/v1.0"
 VG_NS = "http://www.ivoa.net/xml/VORegistry/v1.0"
@@ -31,6 +31,9 @@ def _parsed_identify_resource(rec: PublisherRegistry) -> etree._Element | None:
 
 
 def publisher_datestamp(rec: PublisherRegistry) -> str:
+    if publisher_is_withdrawn(rec):
+        raw = rec.withdrawn_at or rec.updated_at or rec.registered_at
+        return normalize_datestamp(raw)
     resource = _parsed_identify_resource(rec)
     if resource is not None:
         updated = resource.get("updated")
@@ -107,10 +110,11 @@ def _resource_identifier(metadata: etree._Element) -> str | None:
 def publisher_standard_record(rec: PublisherRegistry) -> StandardRecord:
     metadata = publisher_metadata_element(rec)
     ident = _resource_identifier(metadata) or rec.oai_identifier.strip()
+    status = "deleted" if publisher_is_withdrawn(rec) else "active"
     return StandardRecord(
         identifier=ident,
         datestamp=publisher_datestamp(rec),
-        resource_status="active",
+        resource_status=status,
         metadata=metadata,
         oai_set=IVO_PUBLISHERS,
     )

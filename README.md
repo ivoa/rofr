@@ -131,7 +131,29 @@ Useful options:
 - `--json` prints machine-readable results for logs or monitoring.
 - `--timeout SEC` overrides `PUBLISHERS_CHECK_TIMEOUT_SEC`.
 
-Any non-`ok` publisher causes a non-zero exit code unless `--dry-run` is used, which makes the command suitable for alerting. The main page displays the last check status and timestamp once the command has populated `last_checked_at` and `check_status`.
+Any non-`ok` publisher causes a non-zero exit code unless `--dry-run` is used, which makes the command suitable for alerting. The main page displays the last check status and timestamp once the command has populated `last_checked_at` and `check_status`. Withdrawn listings are skipped (see below).
+
+### Withdrawing a publishing registry
+
+Benson advertises OAI `deletedRecord=persistent`. When a registry should leave the active catalogue but harvesters must still see that its OAI identifier was delisted, **withdraw** it (do not delete the row from `publishers.json`).
+
+**Supported control point:** the CLI (manual JSON edits are discouraged):
+
+```bash
+PUBLISHERS_REGISTRY_FILE=/data/publishers/publishers.json \
+  benson withdraw-publisher 'ivo://authority/registry' --reason 'operator note'
+```
+
+- Sets `listing_status` to `withdrawn`, `withdrawn_at`, and optional `withdraw_reason` in `publishers.json`.
+- `/oai` and `/list-publishers` still list the identifier with an OAI header `status="deleted"` and **no metadata body** (tombstone).
+- The home page and `GET /api/v1/registry/publishers` show **active** listings only.
+
+**Reactivation**
+
+- **Preferred:** run harvest validation again and register with the same IVOA identifier (clears withdrawal and refreshes the listing).
+- **Operator emergency:** `benson reactivate-publisher 'ivo://authority/registry'` (no proof of conformance; use when policy allows).
+
+Both commands accept `--dry-run`. A different registry cannot claim an OAI endpoint that still belongs to a withdrawn row until that row is reactivated or the conflict is resolved out of band.
 
 ### Built-in XSD catalog (`builtinSchemas`)
 
@@ -216,4 +238,4 @@ Requirements for updates:
 
 The IVOA identifier itself cannot be changed through this path; a registry with a new identity is a new listing.
 
-`benson check-publishers` may report URL drift in `check_detail` when a live harvest URL differs from the stored value. It does not update the catalogue automatically — re-validate and submit an update through the validator instead.
+`benson check-publishers` may report URL drift in `check_detail` when a live harvest URL differs from the stored value. It does not update the catalogue automatically — re-validate and submit an update through the validator instead. To remove a listing from the active catalogue while keeping an OAI tombstone, use `benson withdraw-publisher` (see Deployers above).

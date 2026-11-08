@@ -13,7 +13,11 @@ from benson.oai.client import fetch_oai
 from benson.oai.phase2 import RI_NS, XSI_NS, extract_identify_state
 from benson.oai.phase2 import OAI_NS
 from benson.registry.publishers_store import PublisherStore, normalize_endpoint
-from benson.service.rofr_lists import PublisherRegistry, harvest_access_url_from_metadata
+from benson.service.rofr_lists import (
+    PublisherRegistry,
+    harvest_access_url_from_metadata,
+    publisher_is_withdrawn,
+)
 
 _XPATH_NS = {"oai": OAI_NS, "ri": RI_NS, "xsi": XSI_NS}
 
@@ -175,7 +179,7 @@ async def check_publishers(
     timeout: float,
     concurrency: int = 5,
 ) -> list[PublisherCheckResult]:
-    publishers = await store.load()
+    publishers = [p for p in await store.load() if not publisher_is_withdrawn(p)]
     checked_at = datetime.now(timezone.utc).isoformat()
     sem = asyncio.Semaphore(max(1, concurrency))
 

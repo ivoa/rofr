@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from benson.config import Settings
 from benson.registry.publishers_store import PublisherStore, normalize_endpoint
 from benson.registry.registration_policy import eligible_for_registration, registration_blocked_by
-from benson.service.rofr_lists import PublisherRegistry
+from benson.service.rofr_lists import LISTING_ACTIVE, PublisherRegistry, publisher_is_withdrawn
 from benson.session.store import HarvestRun, store
 
 
@@ -169,6 +169,7 @@ async def _update_existing(
         run, oid, title, strict_identity=True
     )
     now = datetime.now(timezone.utc).isoformat()
+    reactivated = publisher_is_withdrawn(existing)
     record = PublisherRegistry(
         oai_identifier=oid,
         title=title,
@@ -182,6 +183,9 @@ async def _update_existing(
         live_title=live_title,
         check_detail=check_detail,
         identify_resource_xml=_identify_resource_xml(run, existing),
+        listing_status=LISTING_ACTIVE if reactivated else existing.listing_status,
+        withdrawn_at=None if reactivated else existing.withdrawn_at,
+        withdraw_reason=None if reactivated else existing.withdraw_reason,
     )
     stored = await pub_store.upsert(record)
     return RegistrationResult(record=stored, created=False)

@@ -13,18 +13,13 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **`GET /list-publishers`** | Full OAI envelope; same rows as `ListRecords&set=ivo_publishers` |
 | **Harvest validator** | Phases 1–3, registration, publishers JSON API (see [functional contract](regvalidate-functional-contract.md)) |
 | **Publisher Identify XML** | `identify_resource_xml` in `publishers.json` ([publisher-oai-metadata.md](publisher-oai-metadata.md)) |
+| **Publisher withdraw** | CLI `withdraw-publisher` / `reactivate-publisher`; OAI tombstones; [publisher-oai-metadata.md](publisher-oai-metadata.md) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ---
 
 ## Open items (one PR each)
-
-### PR-C — Withdrawn publisher tombstones
-
-- Define remove/delist flow (API or admin JSON edit).
-- Emit OAI headers with `status="deleted"` and keep rows visible per `deletedRecord=persistent` on `/oai`.
-- Document operator steps in README.
 
 ### PR-D — Deleted or removed standards in `ivo_managed`
 

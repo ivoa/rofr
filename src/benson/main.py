@@ -174,6 +174,59 @@ def _run_refresh_schemas(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def _run_withdraw_publisher(args: argparse.Namespace) -> None:
+    from benson.config import Settings
+    from benson.registry.publisher_lifecycle import PublisherLifecycleError, withdraw_publisher
+    from benson.registry.publishers_store import PublisherStore
+
+    settings = Settings.from_env()
+    store = PublisherStore.from_settings(settings)
+
+    async def run():
+        await store.ensure_seed()
+        return await withdraw_publisher(
+            store,
+            args.oai_identifier,
+            reason=args.reason,
+            dry_run=args.dry_run,
+        )
+
+    try:
+        record = asyncio.run(run())
+    except PublisherLifecycleError as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)
+
+    if args.dry_run:
+        print(f"Would withdraw {record.oai_identifier}")
+        return
+    print(f"Withdrew {record.oai_identifier}")
+
+
+def _run_reactivate_publisher(args: argparse.Namespace) -> None:
+    from benson.config import Settings
+    from benson.registry.publisher_lifecycle import PublisherLifecycleError, reactivate_publisher
+    from benson.registry.publishers_store import PublisherStore
+
+    settings = Settings.from_env()
+    store = PublisherStore.from_settings(settings)
+
+    async def run():
+        await store.ensure_seed()
+        return await reactivate_publisher(store, args.oai_identifier, dry_run=args.dry_run)
+
+    try:
+        record = asyncio.run(run())
+    except PublisherLifecycleError as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)
+
+    if args.dry_run:
+        print(f"Would reactivate {record.oai_identifier}")
+        return
+    print(f"Reactivated {record.oai_identifier}")
+
+
 def main() -> None:
     if len(sys.argv) == 1 or (
         len(sys.argv) > 1
@@ -181,6 +234,8 @@ def main() -> None:
         not in (
             "serve",
             "check-publishers",
+            "withdraw-publisher",
+            "reactivate-publisher",
             "sync-searchables",
             "generate-vocabulary-xsl",
             "refresh-schemas",
@@ -216,6 +271,39 @@ def main() -> None:
         help="Per-request timeout (default: PUBLISHERS_CHECK_TIMEOUT_SEC or 30)",
     )
 
+    withdraw_parser = subparsers.add_parser(
+        "withdraw-publisher",
+        help="Withdraw a publishing registry (OAI persistent tombstone)",
+    )
+    withdraw_parser.add_argument(
+        "oai_identifier",
+        help="IVOA identifier of the registered publishing registry",
+    )
+    withdraw_parser.add_argument(
+        "--reason",
+        default=None,
+        help="Optional audit note stored in publishers.json (not published via OAI)",
+    )
+    withdraw_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would change without writing publishers.json",
+    )
+
+    reactivate_parser = subparsers.add_parser(
+        "reactivate-publisher",
+        help="Reactivate a withdrawn publishing registry (operator emergency)",
+    )
+    reactivate_parser.add_argument(
+        "oai_identifier",
+        help="IVOA identifier of the withdrawn publishing registry",
+    )
+    reactivate_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would change without writing publishers.json",
+    )
+
     sync_parser = subparsers.add_parser(
         "sync-searchables",
         help="Fetch full searchable registries from RegTAP and write the CSV cache",
@@ -240,6 +328,10 @@ def main() -> None:
         _run_serve(args)
     elif args.command == "check-publishers":
         _run_check_publishers(args)
+    elif args.command == "withdraw-publisher":
+        _run_withdraw_publisher(args)
+    elif args.command == "reactivate-publisher":
+        _run_reactivate_publisher(args)
     elif args.command == "sync-searchables":
         _run_sync_searchables(args)
     elif args.command == "generate-vocabulary-xsl":

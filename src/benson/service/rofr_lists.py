@@ -22,6 +22,14 @@ class SearchableRegistry:
     fields: dict[str, str]
 
 
+LISTING_ACTIVE = "active"
+LISTING_WITHDRAWN = "withdrawn"
+
+
+def publisher_is_withdrawn(rec: PublisherRegistry) -> bool:
+    return (rec.listing_status or LISTING_ACTIVE).strip().lower() == LISTING_WITHDRAWN
+
+
 @dataclass
 class PublisherRegistry:
     oai_identifier: str
@@ -36,6 +44,9 @@ class PublisherRegistry:
     live_title: str | None = None
     check_detail: str | None = None
     identify_resource_xml: str | None = None
+    listing_status: str | None = None
+    withdrawn_at: str | None = None
+    withdraw_reason: str | None = None
 
 
 LIST_PUBLISHERS_PATH = "/list-publishers"
@@ -101,7 +112,7 @@ async def load_publishers(settings: Settings, client: httpx.AsyncClient, origin:
 
     store = PublisherStore.from_settings(settings)
     if settings.publishers_registry_file.is_file():
-        return await store.load()
+        return await store.load_active()
     url = f"{origin.rstrip('/')}/api/v1/registry/publishers"
     r = await client.get(url, timeout=min(120.0, settings.harvest_timeout_sec))
     r.raise_for_status()

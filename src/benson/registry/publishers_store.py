@@ -10,7 +10,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from benson.config import Settings
-from benson.service.rofr_lists import PublisherRegistry
+from benson.service.rofr_lists import (
+    LISTING_ACTIVE,
+    LISTING_WITHDRAWN,
+    PublisherRegistry,
+    publisher_is_withdrawn,
+)
 
 _CHECK_FIELD_KEYS = (
     "last_checked_at",
@@ -51,6 +56,9 @@ class StoredPublisher:
     live_title: str | None = None
     check_detail: str | None = None
     identify_resource_xml: str | None = None
+    listing_status: str | None = None
+    withdrawn_at: str | None = None
+    withdraw_reason: str | None = None
 
     def to_registry(self) -> PublisherRegistry:
         return PublisherRegistry(
@@ -66,6 +74,9 @@ class StoredPublisher:
             live_title=self.live_title,
             check_detail=self.check_detail,
             identify_resource_xml=self.identify_resource_xml,
+            listing_status=self.listing_status,
+            withdrawn_at=self.withdrawn_at,
+            withdraw_reason=self.withdraw_reason,
         )
 
     @classmethod
@@ -85,6 +96,9 @@ class StoredPublisher:
             live_title=rec.live_title,
             check_detail=rec.check_detail,
             identify_resource_xml=rec.identify_resource_xml,
+            listing_status=rec.listing_status,
+            withdrawn_at=rec.withdrawn_at,
+            withdraw_reason=rec.withdraw_reason,
         )
 
 
@@ -145,9 +159,15 @@ class PublisherStore:
                     live_title=row.get("live_title"),
                     check_detail=row.get("check_detail"),
                     identify_resource_xml=row.get("identify_resource_xml"),
+                    listing_status=row.get("listing_status"),
+                    withdrawn_at=row.get("withdrawn_at"),
+                    withdraw_reason=row.get("withdraw_reason"),
                 )
             )
         return out
+
+    async def load_active(self) -> list[PublisherRegistry]:
+        return [rec for rec in await self.load() if not publisher_is_withdrawn(rec)]
 
     async def find_by_endpoint(
         self,
@@ -222,3 +242,142 @@ class PublisherStore:
         async with _lock_for(self._path):
             if not self._path.is_file():
                 self._write_document_unlocked(self._empty_document())
+
+    def _row_index_by_identifier(self, rows: list, oai_identifier: str) -> int | None:
+        key = oai_identifier.strip()
+        for i, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            if (row.get("oai_identifier") or "").strip() == key:
+                return i
+        return None
+
+    async def withdraw(
+        self,
+        oai_identifier: str,
+        *,
+        reason: str | None = None,
+        dry_run: bool = False,
+    ) -> PublisherRegistry:
+        key = oai_identifier.strip()
+        if not key:
+            raise ValueError("oai_identifier is required")
+        now = datetime.now(timezone.utc).isoformat()
+        async with _lock_for(self._path):
+            doc = self._read_document_unlocked()
+            rows = doc.setdefault("publishers", [])
+            idx = self._row_index_by_identifier(rows, key)
+            if idx is None:
+                raise LookupError(f"No registered publisher with identifier {key!r}")
+            row = rows[idx]
+            if not isinstance(row, dict):
+                raise LookupError(f"No registered publisher with identifier {key!r}")
+            if (row.get("listing_status") or LISTING_ACTIVE).strip().lower() == LISTING_WITHDRAWN:
+                stored = StoredPublisher(
+                    oai_identifier=(row.get("oai_identifier") or "").strip(),
+                    title=(row.get("title") or "").strip(),
+                    harvest_access_url=(row.get("harvest_access_url") or "").strip(),
+                    registered_at=row.get("registered_at") or now,
+                    updated_at=row.get("updated_at"),
+                    validation_run_id=row.get("validation_run_id"),
+                    last_checked_at=row.get("last_checked_at"),
+                    check_status=row.get("check_status"),
+                    live_oai_identifier=row.get("live_oai_identifier"),
+                    live_title=row.get("live_title"),
+                    check_detail=row.get("check_detail"),
+                    identify_resource_xml=row.get("identify_resource_xml"),
+                    listing_status=row.get("listing_status"),
+                    withdrawn_at=row.get("withdrawn_at"),
+                    withdraw_reason=row.get("withdraw_reason"),
+                )
+                return stored.to_registry()
+            row = dict(row)
+            row["listing_status"] = LISTING_WITHDRAWN
+            row["withdrawn_at"] = now
+            row["updated_at"] = now
+            if reason and reason.strip():
+                row["withdraw_reason"] = reason.strip()
+            if not dry_run:
+                rows[idx] = row
+                self._write_document_unlocked(doc)
+            return StoredPublisher(
+                oai_identifier=(row.get("oai_identifier") or "").strip(),
+                title=(row.get("title") or "").strip() or key,
+                harvest_access_url=(row.get("harvest_access_url") or "").strip(),
+                registered_at=row.get("registered_at") or now,
+                updated_at=row.get("updated_at"),
+                validation_run_id=row.get("validation_run_id"),
+                last_checked_at=row.get("last_checked_at"),
+                check_status=row.get("check_status"),
+                live_oai_identifier=row.get("live_oai_identifier"),
+                live_title=row.get("live_title"),
+                check_detail=row.get("check_detail"),
+                identify_resource_xml=row.get("identify_resource_xml"),
+                listing_status=row.get("listing_status"),
+                withdrawn_at=row.get("withdrawn_at"),
+                withdraw_reason=row.get("withdraw_reason"),
+            ).to_registry()
+
+    async def reactivate(
+        self,
+        oai_identifier: str,
+        *,
+        dry_run: bool = False,
+    ) -> PublisherRegistry:
+        key = oai_identifier.strip()
+        if not key:
+            raise ValueError("oai_identifier is required")
+        now = datetime.now(timezone.utc).isoformat()
+        async with _lock_for(self._path):
+            doc = self._read_document_unlocked()
+            rows = doc.setdefault("publishers", [])
+            idx = self._row_index_by_identifier(rows, key)
+            if idx is None:
+                raise LookupError(f"No registered publisher with identifier {key!r}")
+            row = rows[idx]
+            if not isinstance(row, dict):
+                raise LookupError(f"No registered publisher with identifier {key!r}")
+            if (row.get("listing_status") or LISTING_ACTIVE).strip().lower() != LISTING_WITHDRAWN:
+                stored = StoredPublisher(
+                    oai_identifier=(row.get("oai_identifier") or "").strip(),
+                    title=(row.get("title") or "").strip(),
+                    harvest_access_url=(row.get("harvest_access_url") or "").strip(),
+                    registered_at=row.get("registered_at") or now,
+                    updated_at=row.get("updated_at"),
+                    validation_run_id=row.get("validation_run_id"),
+                    last_checked_at=row.get("last_checked_at"),
+                    check_status=row.get("check_status"),
+                    live_oai_identifier=row.get("live_oai_identifier"),
+                    live_title=row.get("live_title"),
+                    check_detail=row.get("check_detail"),
+                    identify_resource_xml=row.get("identify_resource_xml"),
+                    listing_status=row.get("listing_status"),
+                    withdrawn_at=row.get("withdrawn_at"),
+                    withdraw_reason=row.get("withdraw_reason"),
+                )
+                return stored.to_registry()
+            row = dict(row)
+            row["listing_status"] = LISTING_ACTIVE
+            row["withdrawn_at"] = None
+            row["withdraw_reason"] = None
+            row["updated_at"] = now
+            if not dry_run:
+                rows[idx] = row
+                self._write_document_unlocked(doc)
+            return StoredPublisher(
+                oai_identifier=(row.get("oai_identifier") or "").strip(),
+                title=(row.get("title") or "").strip() or key,
+                harvest_access_url=(row.get("harvest_access_url") or "").strip(),
+                registered_at=row.get("registered_at") or now,
+                updated_at=row.get("updated_at"),
+                validation_run_id=row.get("validation_run_id"),
+                last_checked_at=row.get("last_checked_at"),
+                check_status=row.get("check_status"),
+                live_oai_identifier=row.get("live_oai_identifier"),
+                live_title=row.get("live_title"),
+                check_detail=row.get("check_detail"),
+                identify_resource_xml=row.get("identify_resource_xml"),
+                listing_status=row.get("listing_status"),
+                withdrawn_at=row.get("withdrawn_at"),
+                withdraw_reason=row.get("withdraw_reason"),
+            ).to_registry()

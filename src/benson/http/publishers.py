@@ -40,7 +40,7 @@ async def list_publishers_json(request: Request) -> JSONResponse:
     settings = request.app.state.settings
     pub_store = PublisherStore.from_settings(settings)
     await pub_store.ensure_seed()
-    records = await pub_store.load()
+    records = await pub_store.load_active()
     return JSONResponse([_publisher_json(r) for r in records])
 
 
