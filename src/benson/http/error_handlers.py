@@ -33,7 +33,7 @@ def _extra(request: Request) -> str:
 async def logged_http_exception_handler(request: Request, exc: HTTPException) -> Response:
     """Ensure 4xx/5xx HTTPException bodies are visible in logs (not only uvicorn generic line)."""
     detail: Any = exc.detail
-    if isinstance(detail, list | dict):
+    if isinstance(detail, (list, dict)):
         detail_repr = repr(detail)[:800]
     else:
         detail_repr = str(detail)[:2000]

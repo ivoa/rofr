@@ -24,18 +24,16 @@ IVOA_CHECKS: tuple[tuple[str, str], ...] = (
 
 
 def _failure_message(role: str) -> str:
-    match role:
-        case "Identify":
-            return "Service must respond to a legal OAI Identify query."
-        case "ListMetadataFormats":
-            return "Service must respond to a legal OAI ListMetadataFormats query."
-        case "ListSets":
-            return "Service must respond to a legal OAI ListSets query."
-        case _:
-            return (
-                "Service must respond to a legal OAI ListRecords query "
-                "(and support the 'ivo_vor' metadata prefix and the 'ivo_managed' set)."
-            )
+    if role == "Identify":
+        return "Service must respond to a legal OAI Identify query."
+    if role == "ListMetadataFormats":
+        return "Service must respond to a legal OAI ListMetadataFormats query."
+    if role == "ListSets":
+        return "Service must respond to a legal OAI ListSets query."
+    return (
+        "Service must respond to a legal OAI ListRecords query "
+        "(and support the 'ivo_vor' metadata prefix and the 'ivo_managed' set)."
+    )
 
 
 _XPATH_NS = {"oai": OAI_NS, "ri": RI_NS, "xsi": XSI_NS}

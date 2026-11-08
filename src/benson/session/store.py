@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from lxml import etree
@@ -19,7 +19,7 @@ class HarvestRun:
     show_status: str
     fmt: str
     error_fmt: str
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     oai_validation: etree._ElementTree | None = None  # noqa: SLF001
     ivoa_validation: etree._ElementTree | None = None
     vor_validation: etree._ElementTree | None = None

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import httpx
 from lxml import etree
@@ -17,7 +17,7 @@ from benson.service.rofr_lists import PublisherRegistry, harvest_access_url_from
 
 _XPATH_NS = {"oai": OAI_NS, "ri": RI_NS, "xsi": XSI_NS}
 
-@dataclass(slots=True)
+@dataclass
 class PublisherCheckResult:
     oai_identifier: str
     harvest_access_url: str | None
@@ -176,7 +176,7 @@ async def check_publishers(
     concurrency: int = 5,
 ) -> list[PublisherCheckResult]:
     publishers = await store.load()
-    checked_at = datetime.now(UTC).isoformat()
+    checked_at = datetime.now(timezone.utc).isoformat()
     sem = asyncio.Semaphore(max(1, concurrency))
 
     async def run(pub: PublisherRegistry) -> PublisherCheckResult:

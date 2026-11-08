@@ -1,8 +1,8 @@
-.venv/
-.venv-test/
+.venv*/
 __pycache__/
 *.pyc
 .Python
 *.egg-info/
 .dist/
+build/
 data/

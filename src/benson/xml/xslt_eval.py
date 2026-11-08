@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from lxml import etree
@@ -14,7 +14,7 @@ class XsltAssetsError(RuntimeError):
 
 def rightnow() -> str:
     """UTC timestamp for stylesheet ``rightnow`` params (legacy Java format)."""
-    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def require_stylesheet(xsl_path: Path) -> Path:

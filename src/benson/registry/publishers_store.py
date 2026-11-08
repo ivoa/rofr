@@ -6,7 +6,7 @@ import asyncio
 import json
 import os
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from benson.config import Settings
@@ -37,7 +37,7 @@ def normalize_endpoint(url: str) -> str:
     return u.lower()
 
 
-@dataclass(slots=True)
+@dataclass
 class StoredPublisher:
     oai_identifier: str
     title: str
@@ -74,7 +74,7 @@ class StoredPublisher:
             oai_identifier=rec.oai_identifier,
             title=rec.title,
             harvest_access_url=rec.harvest_access_url,
-            registered_at=rec.registered_at or datetime.now(UTC).isoformat(),
+            registered_at=rec.registered_at or datetime.now(timezone.utc).isoformat(),
             updated_at=rec.updated_at,
             validation_run_id=rec.validation_run_id,
             last_checked_at=rec.last_checked_at,

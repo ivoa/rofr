@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from benson.config import Settings
 from benson.registry.publishers_store import PublisherStore, normalize_endpoint
@@ -18,7 +18,7 @@ class RegistrationError(Exception):
         self.status_code = status_code
 
 
-@dataclass(slots=True)
+@dataclass
 class RegistrationResult:
     record: PublisherRegistry
     created: bool
@@ -115,7 +115,7 @@ async def _register_new(
             status_code=409,
         )
 
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     live_oai_identifier, live_title, check_status, check_detail = _live_check_fields(
         run, oid, title, strict_identity=False
     )
@@ -153,7 +153,7 @@ async def _update_existing(
     live_oai_identifier, live_title, check_status, check_detail = _live_check_fields(
         run, oid, title, strict_identity=True
     )
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     record = PublisherRegistry(
         oai_identifier=oid,
         title=title,

@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ResumptionState:
     verb: str
     metadata_prefix: str

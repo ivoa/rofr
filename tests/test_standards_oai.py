@@ -187,3 +187,66 @@ async def test_list_records_includes_ivo_managed_setspec(client: AsyncClient) ->
         if el.text
     ]
     assert "ivo_managed" in set_specs
+
+
+@pytest.mark.asyncio
+async def test_list_sets_includes_ivo_publishers(client: AsyncClient) -> None:
+    r = await client.get("/oai?verb=ListSets")
+    assert r.status_code == 200
+    root = etree.fromstring(r.content, etree.XMLParser(no_network=True, resolve_entities=False))
+    specs = {
+        el.text.strip()
+        for el in root.findall(f".//{{{OAI_NS}}}setSpec")
+        if el.text
+    }
+    assert "ivo_managed" in specs
+    assert "ivo_publishers" in specs
+
+
+@pytest.mark.asyncio
+async def test_oai_post_identify(client: AsyncClient) -> None:
+    r = await client.post("/oai", data={"verb": "Identify"})
+    assert r.status_code == 200
+    assert "ivo://ivoa.net/rofr" in r.text
+
+
+@pytest.mark.asyncio
+async def test_oai_resumption_walks_pages(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OAI_MAX_RECORDS", "2")
+    transport = client._transport
+    assert isinstance(transport, ASGITransport)
+    core = fastapi_app(transport.app)
+    core.state.settings = Settings.from_env()
+    seen: set[str] = set()
+    query = "/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_managed"
+    while query:
+        r = await client.get(query)
+        assert r.status_code == 200
+        root = etree.fromstring(r.content, etree.XMLParser(no_network=True, resolve_entities=False))
+        for el in root.findall(f".//{{{OAI_NS}}}header/{{{OAI_NS}}}identifier"):
+            if el.text:
+                seen.add(el.text.strip())
+        token_el = root.find(f".//{{{OAI_NS}}}resumptionToken")
+        if token_el is None or not (token_el.text and token_el.text.strip()):
+            break
+        from urllib.parse import quote
+
+        query = f"/oai?verb=ListRecords&resumptionToken={quote(token_el.text.strip(), safe='')}"
+    assert len(seen) >= 29
+    assert "ivo://ivoa.net/rofr" in seen
+
+
+@pytest.mark.asyncio
+async def test_get_record_includes_setspec(client: AsyncClient) -> None:
+    r = await client.get(
+        "/oai?verb=GetRecord&metadataPrefix=ivo_vor&identifier=ivo://ivoa.net/rofr"
+    )
+    assert r.status_code == 200
+    root = etree.fromstring(r.content, etree.XMLParser(no_network=True, resolve_entities=False))
+    header = root.find(f".//{{{OAI_NS}}}record/{{{OAI_NS}}}header")
+    assert header is not None
+    specs = [el.text for el in header.findall(f"{{{OAI_NS}}}setSpec") if el.text]
+    assert "ivo_managed" in specs

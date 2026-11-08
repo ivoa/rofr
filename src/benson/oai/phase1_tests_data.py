@@ -9,7 +9,7 @@ __all__ = ["OAIExplorerCase", "OAI_PHASE1_CASES"]
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class OAIExplorerCase:
     """expect_error_one_of=None means OAI error must NOT be returned.
 

@@ -21,14 +21,14 @@ _SECTION_PREFIX: dict[str, str] = {
 }
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _Test:
     item: str
     status: str
     message: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _Query:
     name: str
     subtitle: str
@@ -45,7 +45,7 @@ class _Query:
         return "pass"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _Section:
     tag: str
     label: str
