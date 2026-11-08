@@ -15,7 +15,7 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 | **Publisher withdraw** | CLI `withdraw-publisher` / `reactivate-publisher`; OAI tombstones; [publisher-oai-metadata.md](publisher-oai-metadata.md) |
 | **Withdrawn standards (`ivo_managed`)** | `status="deleted"` on standard XML and/or [`withdrawn_standards.json`](../assets/standards/withdrawn_standards.json); [assets/standards/README.md](../assets/standards/README.md); [ADR 0008](adr/0008-standards-oai-tombstones.md) |
 | **Searchables / publishers UI** | Home page lists (RegTAP/cache + `publishers.json`) |
-| **Production OAI / proxy** | [README § Deployers](../README.md#deployers), [Production OAI](README.md#production-oai-behind-a-reverse-proxy) (`BENSON_PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, verification) |
+| **Production OAI / proxy** | [production-oai.md](production-oai.md) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 

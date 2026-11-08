@@ -101,7 +101,7 @@ Normative behaviour (legacy servlet name `/regvalidate/VOResourceValidater`): [d
 | `REGISTRATION_MAX_FAILURES` | `0` | Max failures allowed for registration |
 | `REGISTRATION_MAX_WARNINGS` | `999999` | Max warnings allowed for registration |
 | `REGISTRATION_REQUIRE_BUILTIN_SCHEMAS` | on | Require built-in XSD schemas for registration |
-| `BENSON_PROXY_HEADERS` | on | Trust `X-Forwarded-Proto` / `X-Forwarded-Host` so OAI `baseURL`, `oai:request`, and Identify `accessURL` match the public URL (see [docs/README.md § Production OAI](docs/README.md#production-oai-behind-a-reverse-proxy)) |
+| `BENSON_PROXY_HEADERS` | on | Trust `X-Forwarded-Proto` / `X-Forwarded-Host` so OAI `baseURL`, `oai:request`, and Identify `accessURL` match the public URL ([docs/production-oai.md](docs/production-oai.md)) |
 | `FORWARDED_ALLOW_IPS` | `*` | IPs/CIDRs allowed to set forwarded headers (`ProxyHeadersMiddleware`); restrict to your proxy in production |
 | `COMPLY_PATH` | — | Optional comply path |
 | `LOG_LEVEL` | `INFO` | Logging level |
@@ -114,7 +114,7 @@ Normative behaviour (legacy servlet name `/regvalidate/VOResourceValidater`): [d
 
 Benson is usually run behind a reverse proxy. OAI **`Identify`** / **`ListRecords`** responses include **`baseURL`**, every **`oai:request`**, and the Registry harvest **`accessURL`** in self-description metadata—all derived from the request URL. Configure the proxy to send **`X-Forwarded-Proto`** and **`X-Forwarded-Host`**, keep **`BENSON_PROXY_HEADERS=true`** (default), and set **`FORWARDED_ALLOW_IPS`** to your proxy’s addresses.
 
-Verification steps and proxy examples: **[docs/README.md § Production OAI behind a reverse proxy](docs/README.md#production-oai-behind-a-reverse-proxy)**.
+Full guide: **[docs/production-oai.md](docs/production-oai.md)**.
 
 Quick check after deploy:
 
