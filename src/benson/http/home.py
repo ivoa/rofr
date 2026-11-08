@@ -79,7 +79,9 @@ async def home(request: Request) -> HTMLResponse:
             "getting_in_url": _GETTING_IN,
             "resreg_url": _RESREG,
             "reg_if_url": _REG_IF,
-            "publishers_catalog_path": "/list-publishers",
+            "publishers_catalog_path": (
+                "/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers"
+            ),
             "searchables_body": searchables_body,
             "publishers_body": publishers_body,
             "searchables_warn": searchables_warn,

@@ -10,32 +10,18 @@ PR-sized work items for Benson after core OAI publishing on `/oai`. Normative ch
 |------|--------|
 | **`GET` / `POST` `/oai`** | Six verbs, `text/xml`, resumption, `from`/`until`, standard error codes |
 | **`ivo_managed` / `ivo_publishers`** | Sets on `/oai`; publishers from `publishers.json` |
-| **`GET /list-publishers`** | Full OAI envelope; same rows as `ListRecords&set=ivo_publishers` |
 | **Harvest validator** | Phases 1–3, registration, publishers JSON API (see [functional contract](regvalidate-functional-contract.md)) |
 | **Publisher Identify XML** | `identify_resource_xml` in `publishers.json` ([publisher-oai-metadata.md](publisher-oai-metadata.md)) |
 | **Publisher withdraw** | CLI `withdraw-publisher` / `reactivate-publisher`; OAI tombstones; [publisher-oai-metadata.md](publisher-oai-metadata.md) |
 | **Withdrawn standards (`ivo_managed`)** | `status="deleted"` on standard XML and/or [`withdrawn_standards.json`](../assets/standards/withdrawn_standards.json); [assets/standards/README.md](../assets/standards/README.md); [ADR 0008](adr/0008-standards-oai-tombstones.md) |
+| **Searchables / publishers UI** | Home page lists (RegTAP/cache + `publishers.json`) |
+| **Production OAI / proxy** | [README § Deployers](../README.md#deployers), [Production OAI](README.md#production-oai-behind-a-reverse-proxy) (`BENSON_PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, verification) |
 
 Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ---
 
 ## Open items (one PR each)
-
-### PR-E — `/list-publishers` parity sample
-
-- Add `docs/samples/list-publishers/` fixture(s) and a short README.
-- Optional replay test comparing envelope shape to legacy `rofr.ivoa.net` if a capture is available.
-
-### PR-F — `GET /list-searchables` catalog
-
-- Replace 501 stub in `src/benson/http/catalog.py` with an OAI or HTML catalog of searchable registries (RegTAP/cache), or document intentional omission and remove the route.
-- Align with RofR Note §4.3 scope decision in an ADR if behaviour differs from legacy.
-
-### PR-G — Deployer docs: public `baseURL` behind proxies
-
-- Document `BENSON_PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, and verification steps so `Identify` `baseURL` matches the URL harvesters use.
-- Add a short “production OAI” subsection to README or docs/README.
 
 ### PR-H — Requirements compliance audit
 
@@ -50,6 +36,6 @@ Pick **one** gap per PR from [regvalidate-parity-notes.md](regvalidate-parity-no
 
 ## Won’t do (unless explicitly requested)
 
-- **`/list-publishers` as full OAI verb dispatcher** — canonical base is `/oai`; legacy path stays ListRecords-shaped.
+- **Separate CGI-style catalogue routes** (`/list-publishers`, `/list-searchables`, etc.) — harvest and machine catalogues use **`/oai`**; searchables use RegTAP/cache on the home page.
 - **In-repo VO harvest client** for Note §3 — Benson publishes OAI; harvesters are external.
 - **SOAP harvest** — out of scope (RI / Note).

@@ -101,27 +101,6 @@ async def test_publisher_store_upsert(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_list_publishers_route(client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    pub = tmp_path / "publishers.json"
-    monkeypatch.setenv("PUBLISHERS_REGISTRY_FILE", str(pub))
-    ps = PublisherStore(pub)
-    await ps.upsert(
-        PublisherRegistry(
-            oai_identifier="ivo://route/reg",
-            title="Route Reg",
-            harvest_access_url="https://route.example/oai",
-            registered_at="2026-01-01T00:00:00Z",
-        )
-    )
-    r = await client.get("/list-publishers")
-    assert r.status_code == 200
-    assert "ivo://route/reg" in r.text
-    assert "route.example" in r.text
-    assert "responseDate" in r.text
-    assert "ivo_publishers" in r.text
-
-
-@pytest.mark.asyncio
 async def test_oai_ivo_publishers_list_records(
     client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

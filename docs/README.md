@@ -85,12 +85,65 @@ Benson also **publishes** registry metadata over OAI-PMH for the Registry of Reg
 
 | Method | Path | Role |
 |--------|------|------|
-| GET | `/oai` | IVOA standards catalog from [`assets/standards/`](../assets/standards/) (`metadataPrefix=ivo_vor`, `set=ivo_managed`) |
-| GET | `/list-publishers` | Registered publishing registries as OAI XML (from [`data/publishers/`](../data/publishers/)) |
+| GET, POST | `/oai` | RofR OAI-PMH: **`ivo_managed`** — standards from [`assets/standards/`](../assets/standards/); **`ivo_publishers`** — registered registries from [`data/publishers/`](../data/publishers/) (`metadataPrefix=ivo_vor`) |
 
 These are **catalog sources**, not the URLs submitted to the harvest validator. Environment variables `STANDARDS_DIR`, `OAI_REPOSITORY_NAME`, `OAI_REGISTRY_IDENTIFIER`, and related settings control how `/oai` identifies itself; see the [project README](../README.md).
 
-**OAI implementation status:** `GET`/`POST` `/oai` implements the six OAI verbs. Set **`ivo_managed`** serves infrastructure and IVOA standards; set **`ivo_publishers`** serves registered publishing registries. Legacy **`GET /list-publishers`** returns the same publisher list with a full OAI-PMH envelope (canonical harvest: `/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers`). Further work: [implementation-todo.md](implementation-todo.md).
+**OAI implementation status:** `GET`/`POST` `/oai` implements the six OAI verbs, resumption, and standard error codes. Harvest example: `/oai?verb=ListRecords&metadataPrefix=ivo_vor&set=ivo_publishers`. Further work: [implementation-todo.md](implementation-todo.md).
+
+**Human-readable lists:** publishing registries on the home page (from `publishers.json`); full searchable registries via RegTAP/cache (`SEARCHABLES_*` env vars), not OAI. Legacy `listPublishers.py` / `listSearchables.py` CGI shortcuts are not replicated as separate routes.
+
+### Production OAI behind a reverse proxy
+
+Harvesters discover your RofR through **`Identify`** and embedded **`vg:Registry`** metadata. Benson builds those URLs from the incoming HTTP request (`request.url_for("oai")`), not from a separate `OAI_PUBLIC_URL` setting. Behind TLS terminators or path-based proxies, the app must see the **client-facing scheme and host** or responses will advertise `http://`, an internal hostname, or the wrong path.
+
+**Defaults:** `BENSON_PROXY_HEADERS=true` (Docker image and `benson` CLI). `FORWARDED_ALLOW_IPS=*` (trust any client to set forwarded headers—convenient locally, **tighten in production**).
+
+| Setting / flag | Role |
+|----------------|------|
+| `BENSON_PROXY_HEADERS` | When on, wraps the ASGI app with uvicorn `ProxyHeadersMiddleware` (`X-Forwarded-Proto`, client IP) and Benson `ForwardedHostMiddleware` (`X-Forwarded-Host` → `Host` for Starlette URL building). |
+| `FORWARDED_ALLOW_IPS` | Passed to `ProxyHeadersMiddleware` as `trusted_hosts` (comma-separated IPs/CIDRs). Only requests from these hops should be able to influence scheme/client. |
+| `benson --proxy-headers` / `--no-proxy-headers` | CLI override before the app loads settings (sets `BENSON_PROXY_HEADERS`). |
+| `benson --forwarded-allow-ips IPS` | CLI override for `FORWARDED_ALLOW_IPS`. |
+
+**Proxy configuration (typical):** terminate HTTPS at nginx, Caddy, Apache, or a cloud load balancer and forward to Benson with:
+
+- `X-Forwarded-Proto: https`
+- `X-Forwarded-Host: rofr.example.org` (public hostname clients use; omit port if default 443)
+- `X-Forwarded-For` (optional for logging; not used for OAI URL generation)
+
+If the public URL is `https://rofr.example.org/oai` with no path prefix, proxy `/oai` to Benson unchanged. If Benson sits on an internal URL only the proxy can reach, the forwarded headers above must reflect the **public** origin.
+
+**Verification checklist** (replace `https://rofr.example.org` with your public origin):
+
+1. **Identify `baseURL`**
+
+   ```bash
+   curl -sS 'https://rofr.example.org/oai?verb=Identify' \
+     | xmllint --xpath 'string(//*[local-name()="baseURL"])' -
+   ```
+
+   Expected: `https://rofr.example.org/oai` (scheme, host, and path match what harvesters will use).
+
+2. **`oai:request` on the same response**
+
+   ```bash
+   curl -sS 'https://rofr.example.org/oai?verb=Identify' \
+     | xmllint --xpath 'string(//*[local-name()="request"])' -
+   ```
+
+   Expected: same base with `?verb=Identify` (or equivalent) using the public host, not `localhost` or an internal Docker name.
+
+3. **Harvest capability in embedded registry metadata**  
+   In the Identify `description` / `vg:Registry` resource, the Registry harvest **`accessURL`** must equal the public OAI base (same as `baseURL`). Benson sets this from the same derived `base_url`.
+
+4. **Resumption tokens (smoke test)**  
+   If you have many publisher or standard records, run a paged `ListRecords` and follow `resumptionToken` until complete. Request URLs in each response should keep the public host (tokens encode internal state but echoed `request` elements should stay consistent).
+
+5. **Direct vs proxied compare (debugging)**  
+   If (1) fails but `curl http://127.0.0.1:8000/oai?verb=Identify` looks correct internally, the proxy is not sending forwarded headers or `FORWARDED_ALLOW_IPS` blocks the proxy hop. If both show `http://` where you expect `https://`, enable proxy headers and fix the proxy; do not disable TLS at the edge.
+
+**When to turn proxy headers off:** local `benson` on `localhost` with no reverse proxy (`benson --no-proxy-headers` or `BENSON_PROXY_HEADERS=false`). Leaving them on without a trusted proxy is usually harmless if clients connect directly; spoofed `X-Forwarded-*` from the open internet is why production should set `FORWARDED_ALLOW_IPS` to the proxy’s address(es) only.
 
 ### HTTP surface — Benson (current)
 
@@ -123,7 +176,7 @@ Build, servlet mapping, and deployment (maintainer archaeology): [regvalidate-le
 
 | Document | What it explains |
 |----------|------------------|
-| [**implementation-todo.md**](implementation-todo.md) | **Backlog** — PR-sized follow-ups (OAI, publishers, searchables, parity, compliance). |
+| [**implementation-todo.md**](implementation-todo.md) | **Backlog** — PR-sized follow-ups (compliance, parity). |
 | [**publisher-oai-metadata.md**](publisher-oai-metadata.md) | **Publisher OAI listings** — RofR Note §2, `identify_resource_xml` in `publishers.json`, stub fallback. |
 | [**regvalidate-functional-contract.md**](regvalidate-functional-contract.md) | **Normative behaviour** for a rewrite: HTTP surface, session/`runid` model, `op` catalogue, three validation phases, `builtinSchemas`, namespace-to-XSD map, XSLT roles, live response shapes, and related IVOA standards links. Start here when implementing or comparing behaviour. |
 | [**schemas-and-validation-assets.md**](schemas-and-validation-assets.md) | **Developer guide** to bundled XSDs ([`assets/schemas/`](../assets/schemas/)), XSLT rules ([`assets/validate/`](../assets/validate/)), standards records ([`assets/standards/`](../assets/standards/)), and how each validation phase uses them. Includes bundle composition, namespace table, and how to extend schemas. |

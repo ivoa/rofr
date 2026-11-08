@@ -15,7 +15,6 @@ from benson.http.error_handlers import (
     logged_http_exception_handler,
     logged_unhandled_exception_handler,
 )
-from benson.http import catalog as catalog_routes
 from benson.http import harvest as harvest_routes
 from benson.http import home as home_routes
 from benson.http import oai as oai_routes
@@ -63,7 +62,6 @@ def create_app() -> FastAPI:
     application.add_exception_handler(HTTPException, logged_http_exception_handler)
     application.add_exception_handler(Exception, logged_unhandled_exception_handler)
     application.include_router(home_routes.router)
-    application.include_router(catalog_routes.router)
     application.include_router(oai_routes.router)
     application.include_router(validator_routes.router)
     application.include_router(publishers_routes.router, prefix="/api/v1")

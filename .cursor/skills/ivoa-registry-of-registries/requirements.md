@@ -126,7 +126,7 @@ Use when implementing or testing a client that consumes RofR (or documenting exp
 Check against [README.md](../../README.md) and [functional contract](../../docs/regvalidate-functional-contract.md). Verify each exposed route matches documented method, parameters, and response type.
 
 - [ ] RofR OAI publisher (e.g. `GET /oai`). `LOCAL`
-- [ ] Publishers OAI XML (e.g. `GET /list-publishers`). `LOCAL`
+- [ ] Publishers OAI XML (`GET /oai`, `set=ivo_publishers`). `LOCAL`
 - [ ] Publishers JSON API if present. `LOCAL`
 - [ ] Harvest validation UI/API. `LOCAL`
 - [ ] Registration update after successful validation (policy env vars). `LOCAL`

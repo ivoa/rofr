@@ -202,7 +202,7 @@ Do not claim “IVOA compliant” without naming which spec and which tests.
 | Spec concept | Typical Benson location |
 |--------------|-------------------------|
 | RofR OAI publisher | `GET /oai`, `src/benson/oai/` |
-| Publishers catalogue OAI | `GET /list-publishers` |
+| Publishers catalogue OAI | `GET /oai` (`set=ivo_publishers`) |
 | Publishers JSON | `GET /api/v1/registry/publishers` |
 | Harvest validation | `/validator`, `/api/v1/registry-validate/harvest` |
 | Standards records | `assets/standards/`, `set=ivo_managed` on `/oai` |

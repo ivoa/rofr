@@ -1,4 +1,4 @@
-"""Fetch and parse RofR publisher-registry list from a catalogue base URL."""
+"""Load publisher listings for the home page and parse OAI publisher ListRecords XML."""
 
 from __future__ import annotations
 
@@ -47,9 +47,6 @@ class PublisherRegistry:
     listing_status: str | None = None
     withdrawn_at: str | None = None
     withdraw_reason: str | None = None
-
-
-LIST_PUBLISHERS_PATH = "/list-publishers"
 
 
 def _local(tag: str) -> str:
@@ -141,21 +138,6 @@ async def load_publishers(settings: Settings, client: httpx.AsyncClient, origin:
             )
         )
     return out
-
-
-async def fetch_publishers(
-    client: httpx.AsyncClient,
-    origin: str,
-    *,
-    timeout_sec: float = 120.0,
-    settings: Settings | None = None,
-) -> list[PublisherRegistry]:
-    if settings is not None:
-        return await load_publishers(settings, client, origin)
-    url = f"{origin.rstrip('/')}{LIST_PUBLISHERS_PATH}"
-    r = await client.get(url, timeout=timeout_sec)
-    r.raise_for_status()
-    return parse_publishers_oai(r.content)
 
 
 def format_utc_display(iso: str) -> str:

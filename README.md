@@ -39,7 +39,6 @@ benson --reload
 | GET, POST | `/validator`, `/regvalidate` | Async harvest validation form |
 | POST | `/validator/jobs` | Start validation job |
 | GET, POST | `/oai` | RofR OAI-PMH: `ivo_managed` (standards + authorities), `ivo_publishers` (registered registries) |
-| GET | `/list-publishers` | Legacy publisher list (`ListRecords` + `ivo_publishers` envelope) |
 | GET | `/api/v1/registry/publishers` | Publishers registry (JSON) |
 | GET, POST | `/api/v1/registry-validate/harvest` | Harvest validation API |
 | POST | `/api/v1/registry-validate/voresource` | Standalone VOResource validation (see below) |
@@ -102,14 +101,31 @@ Normative behaviour (legacy servlet name `/regvalidate/VOResourceValidater`): [d
 | `REGISTRATION_MAX_FAILURES` | `0` | Max failures allowed for registration |
 | `REGISTRATION_MAX_WARNINGS` | `999999` | Max warnings allowed for registration |
 | `REGISTRATION_REQUIRE_BUILTIN_SCHEMAS` | on | Require built-in XSD schemas for registration |
-| `BENSON_PROXY_HEADERS` | on | Enable proxy headers (fixes template `url_for` behind a reverse proxy) |
-| `FORWARDED_ALLOW_IPS` | `*` | Trusted proxy IPs (tighten in production) |
+| `BENSON_PROXY_HEADERS` | on | Trust `X-Forwarded-Proto` / `X-Forwarded-Host` so OAI `baseURL`, `oai:request`, and Identify `accessURL` match the public URL (see [docs/README.md § Production OAI](docs/README.md#production-oai-behind-a-reverse-proxy)) |
+| `FORWARDED_ALLOW_IPS` | `*` | IPs/CIDRs allowed to set forwarded headers (`ProxyHeadersMiddleware`); restrict to your proxy in production |
 | `COMPLY_PATH` | — | Optional comply path |
 | `LOG_LEVEL` | `INFO` | Logging level |
 | `BENSON_PARITY_JSON` | off | Enable JSON parity mode (`=1` to enable) |
 | `BENSON_EXPOSE_ERRORS` | off | Expose error details in responses (debug only; `=1` to enable) |
 
 ## Deployers
+
+### Production OAI URL (`baseURL`)
+
+Benson is usually run behind a reverse proxy. OAI **`Identify`** / **`ListRecords`** responses include **`baseURL`**, every **`oai:request`**, and the Registry harvest **`accessURL`** in self-description metadata—all derived from the request URL. Configure the proxy to send **`X-Forwarded-Proto`** and **`X-Forwarded-Host`**, keep **`BENSON_PROXY_HEADERS=true`** (default), and set **`FORWARDED_ALLOW_IPS`** to your proxy’s addresses.
+
+Verification steps and proxy examples: **[docs/README.md § Production OAI behind a reverse proxy](docs/README.md#production-oai-behind-a-reverse-proxy)**.
+
+Quick check after deploy:
+
+```bash
+curl -sS 'https://YOUR_PUBLIC_HOST/oai?verb=Identify' \
+  | xmllint --xpath 'string(//*[local-name()="baseURL"])' -
+```
+
+The printed URL must be exactly what harvesters will use (typically `https://YOUR_PUBLIC_HOST/oai`).
+
+### Publisher liveness
 
 Deployers who operate a live Registry of Registries instance should run the publisher liveness check periodically:
 
@@ -145,7 +161,7 @@ PUBLISHERS_REGISTRY_FILE=/data/publishers/publishers.json \
 ```
 
 - Sets `listing_status` to `withdrawn`, `withdrawn_at`, and optional `withdraw_reason` in `publishers.json`.
-- `/oai` and `/list-publishers` still list the identifier with an OAI header `status="deleted"` and **no metadata body** (tombstone).
+- `/oai` (`set=ivo_publishers`) still lists the identifier with an OAI header `status="deleted"` and **no metadata body** (tombstone).
 - The home page and `GET /api/v1/registry/publishers` show **active** listings only.
 
 **Reactivation**
@@ -198,7 +214,7 @@ docker pull ghcr.io/my-org/benson:latest
 | Host path | Container path | Purpose |
 |-----------|----------------|---------|
 | `./data/searchables/` | `/data/searchables` | CSV exports of full searchable registries (RegTAP). Set `SEARCHABLES_CACHE_DIR` to this path. |
-| `./data/publishers/` | `/data/publishers` | Registered publishing registries (`publishers.json`). Served as OAI XML at `/list-publishers`. |
+| `./data/publishers/` | `/data/publishers` | Registered publishing registries (`publishers.json`). Served on `/oai` (`set=ivo_publishers`). |
 
 Example layout:
 
@@ -207,7 +223,7 @@ data/
   searchables/
     registries.csv          # RegTAP sync export
   publishers/
-    publishers.json         # canonical registry list (OAI XML generated at /list-publishers)
+    publishers.json         # canonical registry list (OAI via /oai?set=ivo_publishers)
 ```
 
 ```bash
@@ -226,7 +242,7 @@ SEARCHABLES_CACHE_DIR=./data/searchables benson sync-searchables
 
 ### Registering and updating publishing registries
 
-After a successful validation (zero failures, built-in XSD schemas enabled), the validator offers registration with the Registry of Registries. Submit the registry’s IVOA identifier and title; Benson stores the entry in `publishers.json` (including Identify `vg:Registry` XML when available; see [docs/publisher-oai-metadata.md](docs/publisher-oai-metadata.md)) and serves it at `/list-publishers` and `/oai?set=ivo_publishers`.
+After a successful validation (zero failures, built-in XSD schemas enabled), the validator offers registration with the Registry of Registries. Submit the registry’s IVOA identifier and title; Benson stores the entry in `publishers.json` (including Identify `vg:Registry` XML when available; see [docs/publisher-oai-metadata.md](docs/publisher-oai-metadata.md)) and serves it on `/oai` with `set=ivo_publishers`.
 
 **Updates** use the same flow: validate the registry’s current OAI endpoint (for example after a host or domain change), then submit the same IVOA identifier and an updated title if needed. Benson detects the existing listing and updates `harvest_access_url` and `title` instead of rejecting the submission. The original `registered_at` timestamp is preserved; `updated_at` records when the listing last changed.
 

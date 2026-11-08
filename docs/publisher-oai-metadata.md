@@ -100,7 +100,7 @@ Operators delist a publisher with `benson withdraw-publisher` (see root [README]
 | `withdrawn_at` | OAI **datestamp** for the tombstone |
 | `withdraw_reason` | Optional audit note (not served in OAI) |
 
-Harvester-facing `/oai` and `/list-publishers` still return the OAI identifier in `set=ivo_publishers`, but the record header carries `status="deleted"` and there is **no** `metadata` element (OAI persistent deletion). Human-facing listings and `GET /api/v1/registry/publishers` omit withdrawn rows.
+Harvester-facing `/oai` (`set=ivo_publishers`) still returns the OAI identifier, but the record header carries `status="deleted"` and there is **no** `metadata` element (OAI persistent deletion). Human-facing listings and `GET /api/v1/registry/publishers` omit withdrawn rows.
 
 Example tombstone shape (envelope omitted):
 
