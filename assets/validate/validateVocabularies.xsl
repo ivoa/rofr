@@ -2778,6 +2778,7 @@ hand. -->
 
     <int:data-source-terms>
         <int:term>observation</int:term>
+        <int:term>experimental</int:term>
         <int:term>abstract-model</int:term>
         <int:term>concrete-model</int:term>
     </int:data-source-terms>
