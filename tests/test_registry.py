@@ -18,6 +18,7 @@ os.environ.setdefault("ASSETS_ROOT", str(_repo / "assets" / "validate"))
 
 from benson.app import create_app, fastapi_app  # noqa: E402
 from benson.config import Settings  # noqa: E402
+from benson.oai.xmlutil import extract_error_codes  # noqa: E402
 from benson.registry.oai_emit import publishers_to_list_records_xml
 from benson.registry.publishers_store import PublisherStore
 from benson.registry.registration import eligibility_payload
@@ -151,6 +152,44 @@ async def test_oai_ivo_publishers_list_records(
     set_specs = [el.text for el in first_header.findall(f"{{{OAI_NS}}}setSpec") if el.text]
     assert "ivo_publishers" in set_specs
     assert first_header.find(f"{{{OAI_NS}}}datestamp") is not None
+
+
+@pytest.mark.asyncio
+async def test_oai_ivo_publishers_list_records_oai_dc(
+    client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression for ivoa/rofr#14: oai_dc + ivo_publishers must not return noSetHierarchy."""
+    pub = tmp_path / "publishers.json"
+    monkeypatch.setenv("PUBLISHERS_REGISTRY_FILE", str(pub))
+    ps = PublisherStore(pub)
+    await ps.upsert(
+        PublisherRegistry(
+            oai_identifier="ivo://CDS.VizieR/registry",
+            title="VizieR Registry",
+            harvest_access_url="https://vizier.u-strasbg.fr/oai",
+            registered_at="2026-01-01T00:00:00Z",
+        )
+    )
+    r = await client.get(
+        "/oai?verb=ListRecords&metadataPrefix=oai_dc&set=ivo_publishers"
+    )
+    assert r.status_code == 200
+    root = etree.fromstring(r.content, etree.XMLParser(no_network=True, resolve_entities=False))
+    assert not extract_error_codes(root), r.text[:500]
+    OAI_NS = "http://www.openarchives.org/OAI/2.0/"
+    OAI_DC_NS = "http://www.openarchives.org/OAI/2.0/oai_dc/"
+    idents = [
+        el.text.strip()
+        for el in root.findall(f".//{{{OAI_NS}}}header/{{{OAI_NS}}}identifier")
+        if el.text
+    ]
+    assert idents == ["ivo://CDS.VizieR/registry"]
+    md = root.find(f".//{{{OAI_NS}}}metadata/{{{OAI_DC_NS}}}dc")
+    assert md is not None
+    DC_NS = "http://purl.org/dc/elements/1.1/"
+    title = root.find(f".//{{{DC_NS}}}title")
+    assert title is not None
+    assert (title.text or "").strip() == "VizieR Registry"
 
 
 @pytest.mark.asyncio

@@ -19,11 +19,6 @@ Harvest URLs: [docs/README.md § OAI endpoints](README.md#oai-endpoints).
 
 ## Open items (one PR each)
 
-### PR-A — Test `oai_dc` on `ivo_publishers` (#14)
-
-- Add pytest for `GET /oai?verb=ListRecords&metadataPrefix=oai_dc&set=ivo_publishers` after a fixture publisher is registered.
-- Assert 200, no `noSetHierarchy`, at least one record header with the registered identifier.
-
 ### PR-B — Persist Identify metadata at registration
 
 - On successful registration, store the validated Identify `description` `vg:Registry` XML (or full response slice) in `publishers.json`.
