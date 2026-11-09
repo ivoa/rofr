@@ -12,8 +12,8 @@
   <title>
     IVOA Spectrum Data Model
   </title>
-  <shortName> SpectrumDM </shortName>
-  <identifier> ivo://ivoa.net/std/SpectrumDM </identifier>
+  <shortName>SpectrumDM</shortName>
+  <identifier>ivo://ivoa.net/std/SpectrumDM</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

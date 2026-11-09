@@ -9,9 +9,9 @@
                       http://www.ivoa.net/xml/RegistryInterface/v1.0 http://www.ivoa.net/xml/RegistryInterface/v1.0
                       http://www.ivoa.net/xml/StandardsRegExt/v1.0 http://www.ivoa.net/xml/StandardsRegExt/v1.0">
 
-  <title> Describing Simple Data Access Services </title>
-  <shortName> SimpleDALRegExt </shortName>
-  <identifier> ivo://ivoa.net/std/SimpleDALRegExt </identifier>
+  <title>Describing Simple Data Access Services</title>
+  <shortName>SimpleDALRegExt</shortName>
+  <identifier>ivo://ivoa.net/std/SimpleDALRegExt</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

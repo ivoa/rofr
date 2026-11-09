@@ -11,9 +11,9 @@
                       http://www.ivoa.net/xml/StandardsRegExt/v1.0 http://www.ivoa.net/xml/StandardsRegExt/v1.0
                       http://www.ivoa.net/xml/RegistryInterface/v1.0 http://www.ivoa.net/xml/RegistryInterface/v1.0">
 
-  <title> Simple Cone Search </title>
-  <shortName> ConsSearch </shortName>
-  <identifier> ivo://ivoa.net/std/ConeSearch </identifier>
+  <title>Simple Cone Search</title>
+  <shortName>ConsSearch</shortName>
+  <identifier>ivo://ivoa.net/std/ConeSearch</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

@@ -11,9 +11,9 @@
                       http://www.ivoa.net/xml/StandardsRegExt/v1.0 http://www.ivoa.net/xml/StandardsRegExt/v1.0
                       http://www.ivoa.net/xml/RegistryInterface/v1.0 http://www.ivoa.net/xml/RegistryInterface/v1.0">
 
-  <title> Simple Spectral Access Protocol </title>
-  <shortName> SSA </shortName>
-  <identifier> ivo://ivoa.net/std/SSA </identifier>
+  <title>Simple Spectral Access Protocol</title>
+  <shortName>SSA</shortName>
+  <identifier>ivo://ivoa.net/std/SSA</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

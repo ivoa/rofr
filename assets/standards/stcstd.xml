@@ -12,8 +12,8 @@
   <title>
     Space-Time Coordinate Metadata for the Virtual Observatory
   </title>
-  <shortName> STC </shortName>
-  <identifier> ivo://ivoa.net/std/STC </identifier>
+  <shortName>STC</shortName>
+  <identifier>ivo://ivoa.net/std/STC</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

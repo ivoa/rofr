@@ -11,9 +11,9 @@
                       http://www.ivoa.net/xml/VODataService/v1.1 http://www.ivoa.net/xml/VODataService/v1.1
                       http://www.ivoa.net/xml/StandardsRegExt/v1.0 http://www.ivoa.net/xml/StandardsRegExt/v1.0">
 
-  <title> Simple Image Access Protocol </title>
-  <shortName> SIA </shortName>
-  <identifier> ivo://ivoa.net/std/SIA </identifier>
+  <title>Simple Image Access Protocol</title>
+  <shortName>SIA</shortName>
+  <identifier>ivo://ivoa.net/std/SIA</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">

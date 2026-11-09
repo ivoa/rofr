@@ -9,9 +9,9 @@
                       http://www.ivoa.net/xml/StandardsRegExt/v1.0 http://www.ivoa.net/xml/StandardsRegExt/v1.0
                       http://www.ivoa.net/xml/RegistryInterface/v1.0 http://www.ivoa.net/xml/RegistryInterface/v1.0">
 
-  <title> StandardsRegExt: a VOResource Schema Extension for Describing IVOA Standards </title>
-  <shortName> StandardsRegExt </shortName>
-  <identifier> ivo://ivoa.net/std/StandardsRegExt </identifier>
+  <title>StandardsRegExt: a VOResource Schema Extension for Describing IVOA Standards</title>
+  <shortName>StandardsRegExt</shortName>
+  <identifier>ivo://ivoa.net/std/StandardsRegExt</identifier>
 
   <curation>
     <publisher ivo-id="ivo://ivoa.net/IVOA">
